@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/alphabetHeader"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/member_name_header"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="A"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#000000" 
+            android:background="@color/edittextcolor"/>
+        
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/member_name_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="member"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/edittextcolor" />
+
+            <TextView
+                android:id="@+id/member_mobile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="9999999999"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/edittextcolor" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

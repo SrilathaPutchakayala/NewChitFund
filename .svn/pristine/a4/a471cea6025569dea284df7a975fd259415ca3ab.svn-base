@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/completeLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#fff" >
+
+    <RelativeLayout
+        android:id="@+id/headLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/top_header_bar" >
+
+        <ImageView
+            android:id="@+id/newChitBackBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/back_icon2"
+            android:onClick="backButtonMethod" />
+
+        <TextView
+            android:id="@+id/tv_newChitHeading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="2dp"
+            android:layout_toRightOf="@+id/newChitBackBtn"
+            android:clickable="true"
+            android:onClick="backButtonMethod"
+            android:text="@string/create_new_chit"
+            android:textColor="#fff"
+            android:textSize="@dimen/chitsCreationHeadding" />
+
+        <ImageView
+            android:id="@+id/newChitDoneBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/newChitHomeBtn"
+            android:background="@drawable/donebutton"
+            android:onClick="doneButtonMethod" />
+
+        <ImageView
+            android:id="@+id/newChitHomeBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="10dp"
+            android:background="@drawable/home"
+            android:onClick="homeButton" />
+    </RelativeLayout>
+
+    <ScrollView
+        android:id="@+id/mainChitAddView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/headLayout"
+        android:layout_marginBottom="10dp" >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/tv_chitName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dp"
+                    android:text="@string/chit_name"
+                    android:textColor="#666666"
+                    android:textSize="@dimen/chitsCreationLabels" />
+
+                <EditText
+                    android:id="@+id/chitName"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/chitsFieldMarginLeft"
+                    android:layout_marginRight="@dimen/chitsFieldMarginRight"
+                    android:layout_marginTop="@dimen/chitsFieldMarginTop"
+                    android:background="@drawable/fieldimg"
+                    android:focusableInTouchMode="true"
+                    android:inputType="textCapSentences"
+                    android:maxLength="20"
+                    android:paddingLeft="7dp"
+                    android:textColor="@color/Gray20"
+                    android:textSize="@dimen/chitsCreationLabels" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/tv_chitOwner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dp"
+                    android:text="@string/owner_name"
+                    android:textColor="#666666"
+                    android:textSize="@dimen/chitsCreationLabels" />
+
+                <TextView
+                    android:id="@+id/chitOwner"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/chitsFieldMarginLeft"
+                    android:layout_marginRight="@dimen/chitsFieldMarginRight"
+                    android:layout_marginTop="@dimen/chitsFieldMarginTop"
+                    android:background="@drawable/fieldimg"
+                    android:clickable="true"
+                    android:gravity="center_vertical"
+                    android:onClick="showOwnerLayout"
+                    android:paddingLeft="7dp"
+                    android:textColor="@color/Black"
+                    android:textSize="@dimen/chitsCreationLabels" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/tv_chitAmount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dp"
+                    android:text="@string/total_amount"
+                    android:textColor="#666666"
+                    android:textSize="@dimen/chitsCreationLabels" />
+
+                <EditText
+                    android:id="@+id/chitAmount"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/chitsFieldMarginLeft"
+                    android:layout_marginRight="@dimen/chitsFieldMarginRight"
+                    android:layout_marginTop="@dimen/chitsFieldMarginTop"
+                    android:background="@drawable/fieldimg"
+                    android:inputType="numberDecimal"
+                    android:maxLength="7"
+                    android:paddingLeft="7dp"
+                    android:textColor="@color/Gray20"
+                    android:textSize="@dimen/chitsCreationLabels" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/tv_chitMembers"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dp"
+                    android:text="@string/no_of_members"
+                    android:textColor="#666666"
+                    android:textSize="@dimen/chitsCreationLabels" />
+
+                <EditText
+                    android:id="@+id/chitMembers"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/chitsFieldMarginLeft"
+                    android:layout_marginRight="@dimen/chitsFieldMarginRight"
+                    android:layout_marginTop="@dimen/chitsFieldMarginTop"
+                    android:background="@drawable/fieldimg"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:paddingLeft="7dp"
+                    android:text="5"
+                    android:textColor="@color/Gray20"
+                    android:textSize="@dimen/chitsCreationLabels" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/tv_chitMonths"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dp"
+                    android:text="@string/no_of_months"
+                    android:textColor="#666666"
+                    android:textSize="@dimen/chitsCreationLabels" />
+
+                <EditText
+                    android:id="@+id/chitMonths"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/chitsFieldMarginLeft"
+                    android:layout_marginRight="@dimen/chitsFieldMarginRight"
+                    android:layout_marginTop="@dimen/chitsFieldMarginTop"
+                    android:background="@drawable/fieldimg"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:paddingLeft="7dp"
+                    android:text="5"
+                    android:textColor="@color/Gray20"
+                    android:textSize="@dimen/chitsCreationLabels" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/tv_chitStart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dp"
+                    android:text="@string/start_date"
+                    android:textColor="#666666"
+                    android:textSize="@dimen/chitsCreationLabels" />
+
+                <TextView
+                    android:id="@+id/chitStart"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/chitsFieldMarginLeft"
+                    android:layout_marginRight="@dimen/chitsFieldMarginRight"
+                    android:layout_marginTop="@dimen/chitsFieldMarginTop"
+                    android:background="@drawable/fieldimg"
+                    android:clickable="true"
+                    android:gravity="center_vertical"
+                    android:onClick="showDateDialog"
+                    android:paddingLeft="7dp"
+                    android:textColor="@color/Black"
+                    android:textSize="@dimen/chitsCreationLabels" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/tv_chitBidSpiner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dp"
+                    android:text="@string/bid_date"
+                    android:textColor="#666666"
+                    android:textSize="@dimen/chitsCreationLabels" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/chitsFieldMarginLeft"
+                    android:layout_marginRight="@dimen/chitsFieldMarginRight"
+                    android:layout_marginTop="@dimen/chitsFieldMarginTop" >
+
+                    <Spinner
+                        android:id="@+id/chitBidSpiner"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/fieldimg"
+                        android:entries="@array/payBid_array"
+                        android:paddingLeft="5dp"
+                        android:prompt="@string/payBid_prompt"
+                        android:spinnerMode="dialog"
+                        android:textColor="@color/Gray20"
+                        android:textSize="@dimen/chitsCreationLabels" />
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right" >
+
+                <TextView
+                    android:id="@+id/tv_chitPaySpiner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dp"
+                    android:text="@string/pay_date"
+                    android:textColor="#666666"
+                    android:textSize="@dimen/chitsCreationLabels" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/chitsFieldMarginLeft"
+                    android:layout_marginRight="@dimen/chitsFieldMarginRight"
+                    android:layout_marginTop="@dimen/chitsFieldMarginTop" >
+
+                    <Spinner
+                        android:id="@+id/chitPaySpiner"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/fieldimg"
+                        android:entries="@array/payBid_array"
+                        android:paddingLeft="5dp"
+                        android:prompt="@string/payBid_prompt"
+                        android:spinnerMode="dialog"
+                        android:textColor="@color/Gray20"
+                        android:textSize="@dimen/chitsCreationLabels" />
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/tv_ownerMonthSpiner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dp"
+                    android:text="@string/owner_month"
+                    android:textColor="#666666"
+                    android:textSize="@dimen/chitsCreationLabels" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/chitsFieldMarginLeft"
+                    android:layout_marginRight="@dimen/chitsFieldMarginRight"
+                    android:layout_marginTop="@dimen/chitsFieldMarginTop" >
+
+                    <Spinner
+                        android:id="@+id/ownerMonthSpiner"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/fieldimg"
+                        android:entries="@array/omnerMonth_array"
+                        android:paddingLeft="5dp"
+                        android:prompt="@string/omnerMonth_prompt"
+                        android:spinnerMode="dialog"
+                        android:textColor="@color/Gray20"
+                        android:textSize="@dimen/chitsCreationLabels" />
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp" >
+
+                <TextView
+                    android:id="@+id/tv_chitMembersDetails"
+                    android:layout_width="fill_parent"                   
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:text="@string/add_members"
+                    android:textColor="#666666"
+                    android:textSize="@dimen/chitsCreationLabels" />
+
+                <ImageView
+                    android:id="@+id/chitMembersDetails"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/chitsFieldAddMemberMarginLeft"
+                    android:layout_marginTop="@dimen/chitsFieldMarginTop"
+                    android:background="@drawable/add_button"
+                    android:onClick="chitMembersAdd" />
+            </RelativeLayout>
+        </LinearLayout>
+    </ScrollView>
+    <!-- Add owner layout -->
+
+    <RelativeLayout
+        android:id="@+id/addOwnerLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/headLayout"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/add_own_back"
+        android:visibility="gone" >
+
+        <TextView
+            android:id="@+id/subScreenTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/chitsSubHeadingMargin"
+            android:text="@string/add_owner"
+            android:textColor="#fff"
+            android:textSize="@dimen/chitsCreationLabels" />
+
+        <ImageView
+            android:id="@+id/addOwnerCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="@dimen/chitsCancelMargin"
+            android:layout_marginTop="@dimen/chitsCancelMargin"
+            android:background="@drawable/close_img"
+            android:onClick="showMainLayout" />
+
+        <EditText
+            android:id="@+id/addMemberSearch"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/addOwnerCancel"
+            android:layout_margin="12dp"
+            android:background="@drawable/searchbar_bg"
+            android:drawableRight="@drawable/searchbar_icon"
+            android:hint="@string/search_member_name"
+            android:paddingEnd="6dp"
+            android:paddingStart="6dp"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#a2a2a2"
+            android:textSize="16sp" />
+
+        <ListView
+            android:id="@+id/membersList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/addMemberSearch"
+            android:layout_margin="5dp"
+            android:divider="@null"
+            android:dividerHeight="2dp"
+            android:visibility="gone" >
+        </ListView>
+
+        <RelativeLayout
+            android:id="@+id/addMeamberView"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/addOwnerCancel"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp" >
+
+            <ListView
+                android:id="@+id/addmembersList"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_above="@+id/addDoneMember"
+                android:layout_marginBottom="5dp"
+                android:divider="@null"
+                android:dividerHeight="2dp"
+                android:listSelector="#00000000"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/addDoneMember"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:background="@drawable/done_full_button"
+                android:onClick="saveMemberIds"
+                android:visibility="gone" />
+        </RelativeLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

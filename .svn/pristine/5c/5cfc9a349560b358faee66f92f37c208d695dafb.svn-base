@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/contact_name_back_white"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/alphabetHeader"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/listheaderbg"
+        android:orientation="horizontal" >
+       
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:orientation="horizontal" >
+
+        <ImageView
+            android:id="@+id/ivmemberprofile"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="10dp"
+            android:src="@drawable/user_icon" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/tvmembername"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="25dp"
+                android:text="member"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#4b4b4b"
+                android:textSize="@dimen/addMemberNameList" />
+
+            <TextView
+                android:id="@+id/tvmembermobile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="25dp"
+                android:text="9999999999"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="#4b4b4b"
+                android:textSize="@dimen/addMemberMobileList" />
+        </LinearLayout>
+
+        <!-- <View
+            android:id="@+id/rowdivider"
+            android:layout_width="wrap_content"
+            android:layout_height="1dp"
+            android:background="@drawable/gray_separation" /> -->
+    </LinearLayout>
+
+</LinearLayout>

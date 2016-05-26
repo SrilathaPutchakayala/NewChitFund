@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <RelativeLayout
+        android:id="@+id/rl_custom_bid_list"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="8dp">
+        
+
+        <LinearLayout
+            android:id="@+id/ll_custom_bid_list_1"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_custom_bid_list_member_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Member Name 01"
+                android:textColor="@color/Gray20"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tv_custom_bid_list_bid_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="Bid Date: 07/06/14"
+                android:textColor="@color/Gray20"
+                android:textSize="13sp" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:orientation="vertical"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@id/ll_custom_bid_list_1"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_custom_bid_list_high_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="11000"
+                android:textColor="#63af5d"
+                android:textSize="17sp" />
+        </LinearLayout>
+        
+    </RelativeLayout>
+
+</RelativeLayout>

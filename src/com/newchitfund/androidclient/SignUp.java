@@ -1,0 +1,678 @@
+/**
+ * Project Name	: EasyChit
+ * Class Name	: SignUp
+ * Date			: 29-05-2014, 11:50 AM
+ * Developer	: Sanyasi Rao A
+ * Company		: Sagarsoft India Ltd.
+ * 
+ * Description  :		
+ * ------------------------------------------------------------------------------------------------------------------------------------------
+ * This class shows registration form to user with the following fields - Profile picture, Name, Email, Phone Number and Password.
+ * 
+ * Validations to user input data.
+ * 1) Phone number should contain 10 digits only.
+ * 2) Phone number should not contain all zeros.
+ * 3) Password should contain minimum 3 characters.
+ * 3) Password should contain minimum one digit. 
+
+ * It saves users data using service. It saves image in External Storage Device.
+ * 
+ * On clicking 'Back Icon', it shows user Login screen.
+ * On clicking DONE button, it shows user Categories screen after successful registration.
+ * ------------------------------------------------------------------------------------------------------------------------------------------
+ */
+package com.newchitfund.androidclient;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.ResolveInfo;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.AttributeSet;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
+import android.provider.MediaStore.MediaColumns;
+
+/**
+ * This class do actions for Sign Up screen like add user data using service, validation of data.
+ * @author sunny
+ * 
+ */
+public class SignUp extends Activity {
+
+	private TextView tvBackIcon;
+	private Button btnDone;
+	private ImageView ivMProfilePic;
+	private EditText etName;
+	private EditText etEmail;
+	private EditText etPhone;
+	private EditText etPassword;
+	private EditText etConfirmPassword;
+	private String etMNameVal = null;
+	private String etMEmailVal = null;
+	private String etMPhoneVal = null;
+	private String etMPasswordVal = null;
+	private String etConfirmPasswordVal = null;
+	boolean validation = false;
+	private JSONObject jsonResponse;
+	private final static int REQUEST_CAMERA = 0;
+	private final static int SELECT_FILE = 1;
+	private Bitmap bitmapSquare;
+	private Bitmap bitmapRound;
+	private byte[] ivMProfilePicInByte;
+	private ByteArrayBody bob;
+	private Uri mImageCaptureUri;
+	private static final int CROP_FROM_CAMERA = 2;
+	private Boolean checkNet = false;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.sign_up);
+
+		// Get template objects
+		ivMProfilePic = (ImageView) findViewById(R.id.iv_picCircle);
+		etName = (EditText) findViewById(R.id.et_name);
+		etEmail = (EditText) findViewById(R.id.et_email);
+		etPhone = (EditText) findViewById(R.id.et_phone);
+		etPassword = (EditText) findViewById(R.id.et_password);
+		etConfirmPassword = (EditText) findViewById(R.id.et_confirmPassword);
+
+
+		// Get template objects - to use events
+		btnDone = (Button) findViewById(R.id.btn_done);
+		tvBackIcon = (TextView) findViewById(R.id.tv_backIcon);
+
+		// Change fonts of text in the template
+		etName.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+		etEmail.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+		etPhone.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+		etPassword.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+		etConfirmPassword.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+		tvBackIcon.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+
+		/**
+		 * This click event triggers when user clicks on Back Icon(top left position of the screen).
+		 * It shows user Login screen.
+		 */
+		tvBackIcon.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+					Intent menu = new Intent(SignUp.this, Login.class);
+					startActivity(menu);
+					finish();
+					overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+				
+			}
+		});
+
+		/**
+		 * This click event triggers when user clicks on Profile picture.
+		 * It takes photo with two options. 
+		 * A)Camera B)Picture from Library
+		 * It converts image to rounded shape. 
+		 */
+		ivMProfilePic.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				final CharSequence[] options = {"Take Photo", "Choose from Library", "Cancel"};
+				AlertDialog.Builder builder = new AlertDialog.Builder(SignUp.this);
+				builder.setTitle("Add Photo!");
+				builder.setItems(options, new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int option) {
+						if (options[option].equals("Take Photo")) {
+
+							Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+							mImageCaptureUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(),
+									"tmp_avatar_" + String.valueOf(System.currentTimeMillis()) + ".jpg"));
+
+							intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
+							try {
+								intent.putExtra("return-data", true);
+
+								startActivityForResult(intent, REQUEST_CAMERA);
+							} catch (ActivityNotFoundException e) {
+								e.printStackTrace();
+							}
+						} else if (options[option].equals("Choose from Library")) {
+							Intent intent = new Intent();
+
+							intent.setType("image/*");
+							intent.setAction(Intent.ACTION_PICK);
+
+							startActivityForResult(Intent.createChooser(intent, "Complete action using"), SELECT_FILE);
+						} else if (options[option].equals("Cancel")) {
+							dialog.dismiss();
+						}
+					}
+				});
+				builder.show();
+			}
+		});
+
+		/**
+		 * This click event triggers when user clicks on DONE button.
+		 * It receives data from template file.
+		 * It validates member details.
+		 * It converts image to bytes to save it in database.
+		 * It sends data to database by service when validation of data is successful. 
+		 */
+		btnDone.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+
+				validation = false;
+
+				// Get input values
+				etMNameVal = etName.getText().toString();
+				etMEmailVal = etEmail.getText().toString();
+				etMPhoneVal = etPhone.getText().toString();
+				etMPasswordVal = etPassword.getText().toString();
+				etConfirmPasswordVal = etConfirmPassword.getText().toString();
+
+				// Convert bitmap to bytes
+				if (bitmapSquare!=null) {
+					ByteArrayOutputStream stream = new ByteArrayOutputStream();
+					bitmapSquare.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+					ivMProfilePicInByte = stream.toByteArray();	
+					bob = new ByteArrayBody(ivMProfilePicInByte, "temp.png");
+				}
+
+				// Member input validation
+				if (dataValid()) { new SignUpAsyncTask().execute(); }
+
+			}
+
+		});
+		
+		etConfirmPassword.setOnEditorActionListener(new OnEditorActionListener() {
+	        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+	            if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
+	                //Log.i("Action: ","Enter pressed");
+					validation = false;
+
+					// Get input values
+					etMNameVal = etName.getText().toString();
+					etMEmailVal = etEmail.getText().toString();
+					etMPhoneVal = etPhone.getText().toString();
+					etMPasswordVal = etPassword.getText().toString();
+					etConfirmPasswordVal = etConfirmPassword.getText().toString();
+
+					// Convert bitmap to bytes
+					if (bitmapSquare!=null) {
+						ByteArrayOutputStream stream = new ByteArrayOutputStream();
+						bitmapSquare.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+						ivMProfilePicInByte = stream.toByteArray();	
+						bob = new ByteArrayBody(ivMProfilePicInByte, "temp.png");
+					}
+
+					// Member input validation
+					if (dataValid()) { new SignUpAsyncTask().execute(); }	                
+	            }    
+	            return false;
+	        }
+	    });
+	}
+
+	/**
+	 * This method validates input entered by member
+	 * @return boolean value true if the given input by member is valid else boolean value false
+	 */
+	private boolean dataValid() {
+		// Password should contain at least one number
+		int combinations = 0;
+		if (Pattern.compile("[0-9]").matcher(etMPasswordVal).find()) { combinations = combinations + 10; }
+
+		if (etMNameVal.length()==0) {
+			Toast.makeText(getApplicationContext(), "Please enter Name", Toast.LENGTH_LONG).show();
+		} else {
+			Pattern p = Pattern.compile("[^a-zA-Z0-9]");
+			if (p.matcher(etMNameVal).find()) {
+				Toast.makeText(getApplicationContext(), "Member Name should not contain special characters", Toast.LENGTH_LONG).show();
+			} else {
+				char c = etMNameVal.charAt(0);
+				if ((c >= '0' && c <= '9')) {
+					Toast.makeText(getApplicationContext(), "Member Name should start with alphabet", Toast.LENGTH_LONG).show();
+				} else if (etMEmailVal.length()==0) {
+					Toast.makeText(getApplicationContext(), "Please enter Email", Toast.LENGTH_LONG).show();
+				} else {
+					// Validate Email
+					String regExpn =
+							"^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
+									+"((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+									+"[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
+									+"([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+									+"[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
+									+"([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$";
+
+					CharSequence inputStr = etMEmailVal;
+					Pattern pattern = Pattern.compile(regExpn,Pattern.CASE_INSENSITIVE);
+					Matcher matcher = pattern.matcher(inputStr);
+
+					if (!matcher.matches()) {
+						Toast.makeText(getApplicationContext(), "Please enter valid Email", Toast.LENGTH_SHORT).show();
+					} else if (etMPhoneVal.length()==0) {
+						Toast.makeText(getApplicationContext(), "Please enter Phone Number", Toast.LENGTH_SHORT).show();
+					} else if (etMPhoneVal.length()!=10) {
+						Toast.makeText(getApplicationContext(), "Please enter valid Phone Number", Toast.LENGTH_SHORT).show();
+					} else if (etMPasswordVal.length()==0) {
+						Toast.makeText(getApplicationContext(), "Please enter Password", Toast.LENGTH_SHORT).show();
+					} else if (etMPasswordVal.length()<3) {
+						Toast.makeText(getApplicationContext(), "Password should not be less than 3 characters", Toast.LENGTH_LONG).show();
+					} else if (combinations==0) {
+						Toast.makeText(getApplicationContext(), "Password should contain at least one number", Toast.LENGTH_LONG).show();
+					} else if (etConfirmPasswordVal.length()==0) {
+						Toast.makeText(getApplicationContext(), "Please confirm your Password", Toast.LENGTH_SHORT).show();
+					} else if (!etMPasswordVal.equals(etConfirmPasswordVal)) {
+						etPassword.setText("");
+						etConfirmPassword.setText("");
+						etPassword.requestFocus(1);
+						Toast.makeText(getApplicationContext(), "Password doesn't match with Confirm Password", Toast.LENGTH_LONG).show();
+					} else {
+						validation = true;
+					}
+				}
+			}
+		}
+		return validation;
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode == RESULT_OK) {
+			if (requestCode == REQUEST_CAMERA) {
+				if (resultCode != 0) {
+					doCrop();
+				}
+			}
+			else if (requestCode == SELECT_FILE) {
+				if (resultCode != 0) {
+					mImageCaptureUri = data.getData();
+					doCrop();
+				}
+			} else if (requestCode==CROP_FROM_CAMERA) {
+				//case CROP_FROM_CAMERA:
+				if (resultCode != 0)
+				{
+					Bundle extras = data.getExtras();
+
+					if (extras != null) {     
+
+						try {
+							bitmapSquare = extras.getParcelable("data");
+							if (getResources().getDisplayMetrics().density==1.5)
+							{
+								bitmapRound = MLRoundedImageView.getCroppedBitmap(bitmapSquare, 123);
+							} else if (getResources().getDisplayMetrics().density==2)
+							{
+								bitmapRound = MLRoundedImageView.getCroppedBitmap(bitmapSquare, 184);
+							}
+							else
+							{
+								bitmapRound = MLRoundedImageView.getCroppedBitmap(bitmapSquare, 184);
+							}
+							
+							ivMProfilePic.setImageBitmap(bitmapRound);
+							
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				File f = new File(mImageCaptureUri.getPath());            
+
+				if (f.exists()) f.delete();
+			}
+		}
+
+	}
+
+
+	private void doCrop() {
+		final ArrayList<CropOption> cropOptions = new ArrayList<CropOption>();
+
+		Intent intent = new Intent("com.android.camera.action.CROP");
+		intent.setType("image/*");
+		//intent.putExtra("circleCrop", true);
+		List<ResolveInfo> list = getPackageManager().queryIntentActivities( intent, 0 );
+
+		int size = list.size();
+
+		if (size == 0) {        
+			Toast.makeText(this, "Can not find image crop app", Toast.LENGTH_SHORT).show();
+
+			return;
+		} else {
+			intent.setData(mImageCaptureUri);
+
+			intent.putExtra("outputX", 100);
+			intent.putExtra("outputY", 100);
+			intent.putExtra("aspectX", 1);
+			intent.putExtra("aspectY", 1);
+			intent.putExtra("scale", true);
+			intent.putExtra("return-data", true);
+
+			if (size == 1) {
+				Intent i = new Intent(intent);
+				ResolveInfo res = list.get(0);
+
+				i.setComponent( new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+
+				startActivityForResult(i, CROP_FROM_CAMERA);
+			} else {
+				for (ResolveInfo res : list) {
+					final CropOption co = new CropOption();
+
+					co.title = getPackageManager().getApplicationLabel(res.activityInfo.applicationInfo);
+					co.icon = getPackageManager().getApplicationIcon(res.activityInfo.applicationInfo);
+					co.appIntent= new Intent(intent);
+
+					co.appIntent.setComponent( new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+
+					cropOptions.add(co);
+				}
+
+				CropOptionAdapter adapter = new CropOptionAdapter(getApplicationContext(), cropOptions);
+
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle("Crop Photo");
+				builder.setAdapter( adapter, new DialogInterface.OnClickListener() {
+					public void onClick( DialogInterface dialog, int item ) {
+						startActivityForResult( cropOptions.get(item).appIntent, CROP_FROM_CAMERA);
+					}
+				});
+
+				builder.setOnCancelListener( new DialogInterface.OnCancelListener() {
+					@Override
+					public void onCancel( DialogInterface dialog ) {
+
+						if (mImageCaptureUri != null ) {
+							getContentResolver().delete(mImageCaptureUri, null, null );
+							mImageCaptureUri = null;
+						}
+					}
+				} );
+
+				AlertDialog alert = builder.create();
+
+				alert.show();
+			}
+		}
+	}
+
+
+	/**
+	 * This method returns path of the photo image
+	 * @param uri - Image URI
+	 * @param activity - Current activity
+	 * @return path of the image
+	 */
+	public String getPath(Uri uri, Activity activity) {
+		String[] projection = { MediaColumns.DATA };
+		Cursor cursor = activity.managedQuery(uri, projection, null, null, null);
+		int column_index = cursor.getColumnIndexOrThrow(MediaColumns.DATA);
+		cursor.moveToFirst();
+		return cursor.getString(column_index);
+	}
+
+
+	/**
+	 * This class saves new user details in database by service in background 
+	 * @author sunny
+	 * 
+	 */
+	class SignUpAsyncTask extends AsyncTask<Void, Void, String> {
+
+		ProgressDialog pd;
+		String sStatus=null, sMessage=null;
+
+		@Override
+		protected void onPreExecute() {
+			pd = new ProgressDialog(SignUp.this);
+			pd.setIndeterminate(true);
+			pd.setCancelable(false);
+			pd.setMessage("Registration is in process");
+			pd.show();
+			super.onPreExecute();
+		}
+
+		@Override
+		protected String doInBackground(Void... arg0) {
+			try {
+				
+				// Check network connection to call service 
+				checkNet = Utils.isInternetAvailable(SignUp.this);
+				
+				if (checkNet) {
+					String URL = getResources().getString(R.string.URL);
+					String adminID = getResources().getString(R.string.adminID);
+
+					HttpClient client = new DefaultHttpClient();
+					HttpPost post = new HttpPost(URL);
+					MultipartEntity multiEntity = new MultipartEntity();
+
+					multiEntity.addPart("name", new StringBody(etMNameVal));				
+					multiEntity.addPart("email", new StringBody(etMEmailVal));
+					multiEntity.addPart("phone", new StringBody(etMPhoneVal));
+					multiEntity.addPart("password", new StringBody(etMPasswordVal));
+
+					if (bitmapSquare!=null) { multiEntity.addPart("profilePic", bob); }
+
+					// Value from strings.xml
+					multiEntity.addPart("adminID", new StringBody(adminID));
+
+					// Static values
+					multiEntity.addPart("call", new StringBody("registerUser"));
+					multiEntity.addPart("deviceType", new StringBody("Android"));
+
+					//sending registration ID
+					SharedPreferences prefs =  getSharedPreferences(SessionStorage.ACCOUNT_PREFS_NAME, Context.MODE_PRIVATE);
+					multiEntity.addPart("deviceToken", new StringBody(prefs.getString(Login.PROPERTY_REG_ID, "regId")));
+
+					post.setEntity(multiEntity);
+					HttpResponse response = client.execute(post);
+					String res = EntityUtils.toString(response.getEntity());
+
+					//Log.v("response", "Response: " + res);
+					jsonResponse = new JSONObject(res);
+
+					sStatus = jsonResponse.getString("Status");
+					sMessage = jsonResponse.getString("Message");
+
+					if (sStatus.equalsIgnoreCase("Success")) { return "success"; }
+					
+					if (!sMessage.equalsIgnoreCase("OK")) { return sMessage; }					
+				}
+
+			}catch(UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}catch(ClientProtocolException e) {
+				e.printStackTrace();
+			}catch(IOException e) {
+				e.printStackTrace();
+			}catch(JSONException e) {
+				e.printStackTrace();
+			}
+			return "Something went wrong";
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+
+			if (pd.isShowing()) {
+				
+				pd.dismiss();
+				
+				if (!checkNet) {
+					Toast.makeText(SignUp.this, "Please check network connection", Toast.LENGTH_SHORT).show();
+				} else if (result.equalsIgnoreCase("success")) {
+
+					// Show status message to user
+					Toast.makeText(getApplicationContext(), "You are registered successfully", Toast.LENGTH_LONG).show();
+
+					// Navigate to Login screen
+					Intent menu = new Intent(SignUp.this, Login.class);
+					startActivity(menu);
+					finish();
+					overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+
+				} else {
+					Toast.makeText(getApplicationContext(), result, Toast.LENGTH_LONG).show();
+				}
+			}
+			super.onPostExecute(result);
+		}
+	}
+
+	/**
+	 * This class crops bitmap image to rounded shape
+	 * @author sunny
+	 *
+	 */
+	public static class MLRoundedImageView extends ImageView {
+
+		public MLRoundedImageView(Context context) {
+			super(context);
+		}
+
+		public MLRoundedImageView(Context context, AttributeSet attrs) {
+			super(context, attrs);
+		}
+
+		public MLRoundedImageView(Context context, AttributeSet attrs, int defStyle) {
+			super(context, attrs, defStyle);
+		}
+
+		@Override
+		protected void onDraw(Canvas canvas) {
+
+			Drawable drawable = getDrawable();
+
+			if (drawable == null) { return; }
+
+			if (getWidth() == 0 || getHeight() == 0) { return; }
+			Bitmap b = ((BitmapDrawable) drawable).getBitmap();
+			Bitmap bitmap = b.copy(Bitmap.Config.ARGB_8888, true);
+			int w = getWidth();
+
+			Bitmap roundBitmap = getCroppedBitmap(bitmap, w);
+			canvas.drawBitmap(roundBitmap, 0, 0, null);
+
+		}
+
+		/**
+		 * This method crops bitmap image to rounded shape
+		 * @param bmp - Object of bitmap image
+		 * @param radius - Required radius of the bitmap image
+		 * @return cropped bitmap image with rounded shape
+		 */
+		public static Bitmap getCroppedBitmap(Bitmap bmp, int radius) {
+			Bitmap sbmp;
+
+			if (bmp.getWidth() != radius || bmp.getHeight() != radius) {
+				float smallest = Math.min(bmp.getWidth(), bmp.getHeight());
+				float factor = smallest / radius;
+				sbmp = Bitmap.createScaledBitmap(bmp, (int)(bmp.getWidth() / factor), (int)(bmp.getHeight() / factor), false);
+			} else {
+				sbmp = bmp;
+			}
+
+			Bitmap output = Bitmap.createBitmap(radius, radius,
+					Config.ARGB_8888);
+			Canvas canvas = new Canvas(output);
+
+			final Paint paint = new Paint();
+			final Rect rect = new Rect(0, 0, radius, radius);
+
+			paint.setAntiAlias(true);
+			paint.setFilterBitmap(true);
+			paint.setDither(true);
+			canvas.drawARGB(0, 0, 0, 0);
+			paint.setColor(Color.parseColor("#BAB399"));
+			canvas.drawCircle(radius / 2 + 0.7f,
+					radius / 2 + 0.7f, radius / 2 + 0.1f, paint);
+			paint.setXfermode(new PorterDuffXfermode(android.graphics.PorterDuff.Mode.SRC_IN));
+			canvas.drawBitmap(sbmp, rect, rect, paint);
+
+			return output;
+		}
+
+	}	
+
+	@Override
+	public void onBackPressed() {
+		Intent menu = new Intent(SignUp.this, Login.class);
+		startActivity(menu);
+		finish();
+		overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+		super.onBackPressed();
+	}
+	
+	private boolean networkAvailable() {
+		checkNet = Utils.isInternetAvailable(SignUp.this);
+		if (checkNet) {
+			return true;
+		} else {
+			Toast.makeText(SignUp.this, "Please check network connection", Toast.LENGTH_SHORT).show();
+			return false;
+		}
+	}
+	
+}

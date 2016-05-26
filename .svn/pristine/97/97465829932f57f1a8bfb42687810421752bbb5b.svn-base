@@ -1,0 +1,885 @@
+/**
+ * Project Name	: Chitfund
+ * Class Name	: Settings
+ * Date			: 02-06-2014, 1:29 PM
+ * Developer	: Sanyasi Rao A
+ * Company		: Sagarsoft India Ltd.
+ * 
+ * Description  :		
+ * ------------------------------------------------------------------------------------------------------------------------------------------
+ * This class shows up User details to update.
+ * It takes data from session to show it to user.
+ * It validates input entered by user.
+ * User can update Profile image, Email ID and Password only. 
+ * It updates user details using service in background.
+ * When user clicks on Edit button fields get enabled to update User details. It replaces Edit button with Done button.
+ * When user clicks on Back button, it shows Categories screen.
+ * When user clicks on Done button, it updates user details and shows Categories screen.
+ * ------------------------------------------------------------------------------------------------------------------------------------------
+ */
+package com.newchitfund.androidclient;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.newchitfund.androidclient.SignUp.MLRoundedImageView;
+import com.newchitfund.imagecaching.ImageLoader;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.ResolveInfo;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.graphics.Bitmap.Config;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.provider.MediaStore.MediaColumns;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class Settings extends Activity {
+
+	private ImageView btnBack;
+	private ImageView btnEditSettings;
+	private ImageView btnSaveSettings;
+	private TextView tvMProfilePic;
+	private String mId=null;
+	private String mPhone=null;
+	private EditText etMName;
+	private EditText etMEmail;
+	private EditText etMPhone;
+	private EditText etMOldPassword;
+	private EditText etMNewPassword;
+	private EditText etMConfirmPassword;
+	private SessionStorage sessionStorage;
+	private HashMap<String, String> loggedInDetails = new HashMap<String, String>();
+	private final static int REQUEST_CAMERA = 0;
+	private final static int SELECT_FILE = 1;
+	private Bitmap bitmapSquare;
+	private Bitmap bitmapRound;
+	private byte[] tvMProfilePicInByte;
+	private ByteArrayBody bob;	
+	private JSONObject jsonResponse;
+	private TextView tvLogout;
+	private ImageLoader imgLoader;
+	private String mEmail = null;
+	private String mOldPassword = null;
+	private String mNewPassword = null;
+	private String mConfirmPassword = null;
+	private Uri mImageCaptureUri;
+	private static final int CROP_FROM_CAMERA = 2;
+	private Boolean checkNet = false;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		setContentView(R.layout.settings);
+		super.onCreate(savedInstanceState);
+
+		// Get object from template
+		btnBack = (ImageView) findViewById(R.id.btn_back);
+		btnEditSettings = (ImageView) findViewById(R.id.btn_editSettings);
+		btnSaveSettings = (ImageView) findViewById(R.id.btn_saveSettings);
+		tvMProfilePic = (TextView) findViewById(R.id.tv_profPic);
+		etMName = (EditText) findViewById(R.id.et_name);
+		etMEmail = (EditText) findViewById(R.id.et_email);
+		etMPhone = (EditText) findViewById(R.id.et_phone);
+		etMOldPassword = (EditText) findViewById(R.id.et_oldPassword);
+		etMNewPassword = (EditText) findViewById(R.id.et_newPassword);
+		etMConfirmPassword = (EditText) findViewById(R.id.et_confirmPassword);
+		tvLogout = (TextView) findViewById(R.id.tv_logout);
+
+		// Change fonts of text in the template
+		etMName.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+		etMEmail.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+		etMPhone.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+		etMOldPassword.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+		etMNewPassword.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+		etMConfirmPassword.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+		tvLogout.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+		
+		// To hide Done button by default
+		btnSaveSettings.setVisibility(View.INVISIBLE);
+
+		// To disable fields by default
+		tvMProfilePic.setEnabled(false);
+		etMName.setEnabled(false);
+		etMEmail.setEnabled(false);
+		etMPhone.setEnabled(false);
+		etMOldPassword.setEnabled(false);
+		etMNewPassword.setEnabled(false);
+		etMConfirmPassword.setEnabled(false);
+
+		// Get session values
+		sessionStorage = new SessionStorage(getApplicationContext());
+		loggedInDetails = sessionStorage.getLoginDetails();
+
+		// These session values are used in other classes
+		mId = loggedInDetails.get("MEMBER_ID");
+		mPhone = loggedInDetails.get("MEMBER_PHONE");
+
+		
+		// Set session values to form fields or show existing user details
+
+		// Load and show image in background
+		new LoadImageAsyncTask().execute();
+
+		etMName.setText(loggedInDetails.get("MEMBER_NAME"));
+		etMEmail.setText(loggedInDetails.get("MEMBER_EMAIL"));
+		etMPhone.setText(mPhone);
+
+		/**
+		 * This event is triggered when user clicks on Back button. It shows Categories screen.
+		 */
+		btnBack.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Intent categoriesIntent = new Intent(Settings.this, Categories.class);
+				startActivity(categoriesIntent);
+				finish();			
+			}
+		});
+
+		/**
+		 * This event is triggered when user clicks on Edit button. It replace Edit button with Done button to let user save data.
+		 * It enables input fields to let user update the details. 
+		 */
+
+		btnEditSettings.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+
+				// To hide Edit button and show Done button
+				btnEditSettings.setVisibility(View.INVISIBLE);
+				btnSaveSettings.setVisibility(View.VISIBLE);
+
+				// To enable fields
+				tvMProfilePic.setEnabled(true);
+				etMEmail.setEnabled(true);
+				etMOldPassword.setEnabled(true);
+				etMNewPassword.setEnabled(true);
+				etMConfirmPassword.setEnabled(true);
+
+			}
+		});
+
+		/**
+		 * This event is triggered when user click on Done button to let user save Member details.
+		 */
+		btnSaveSettings.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+
+				boolean validation = false;
+
+				// Convert bitmap to bytes
+				if(bitmapSquare!=null) {
+					ByteArrayOutputStream stream = new ByteArrayOutputStream();
+					bitmapSquare.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+					tvMProfilePicInByte = stream.toByteArray();	
+					bob = new ByteArrayBody(tvMProfilePicInByte, "temp.png");
+				}
+
+				// Member input validation
+
+				// Get input values
+				mEmail = etMEmail.getText().toString();
+				mOldPassword = etMOldPassword.getText().toString();
+				mNewPassword = etMNewPassword.getText().toString();
+				mConfirmPassword = etMConfirmPassword.getText().toString();
+
+				if(mEmail.length()==0) {
+					Toast.makeText(getApplicationContext(), "Please enter Email", Toast.LENGTH_SHORT).show();
+				}else{
+					// Validate Email
+					String regExpn =
+							"^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
+									+"((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+									+"[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
+									+"([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+									+"[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
+									+"([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$";
+
+					CharSequence inputStr = mEmail;
+					Pattern pattern = Pattern.compile(regExpn,Pattern.CASE_INSENSITIVE);
+					Matcher matcher = pattern.matcher(inputStr);
+
+					if(!matcher.matches()){
+						Toast.makeText(getApplicationContext(), "Please enter valid Email", Toast.LENGTH_SHORT).show();
+					}else if(mOldPassword.length()>0 || mNewPassword.length()>0 || mConfirmPassword.length()>0){
+						if(mOldPassword.length()==0) {
+							Toast.makeText(getApplicationContext(), "Please enter Old Password", Toast.LENGTH_SHORT).show();
+						}else{
+
+							// Password should contain at least one number
+							int mOldPasswordCombinations = 0;
+							if(Pattern.compile("[0-9]").matcher(mOldPassword).find()) {
+								mOldPasswordCombinations = mOldPasswordCombinations + 10;
+							}
+
+							if(mOldPasswordCombinations==0 || mOldPassword.length()<3) {
+								Toast.makeText(getApplicationContext(), "Please enter valid Old Password", Toast.LENGTH_SHORT).show();
+							}else if(mNewPassword.length()==0) {
+								Toast.makeText(getApplicationContext(), "Please enter New Password", Toast.LENGTH_SHORT).show();
+							}else if(mNewPassword.equals(mOldPassword)) {
+								Toast.makeText(getApplicationContext(), "New Password should be different from Old Password", Toast.LENGTH_LONG).show();
+							}else{
+
+								// Password should contain at least one number
+								int mNewPasswordCombinations = 0;
+								if(Pattern.compile("[0-9]").matcher(mNewPassword).find()) {
+									mNewPasswordCombinations = mNewPasswordCombinations + 10;
+								}
+
+								if(mNewPassword.length()<3) {
+									Toast.makeText(getApplicationContext(), "New Password should not be less than 3 characters", Toast.LENGTH_LONG).show();
+								}else if(mNewPasswordCombinations==0) {
+									Toast.makeText(getApplicationContext(), "New Password should contain at least one number", Toast.LENGTH_LONG).show();
+								}else if(mConfirmPassword.length()==0){
+									Toast.makeText(getApplicationContext(), "Please confirm your Password", Toast.LENGTH_SHORT).show();
+								}else if(!mNewPassword.equals(mConfirmPassword)) {
+									Toast.makeText(getApplicationContext(), "New Password doesn't match with Confirm Password", Toast.LENGTH_LONG).show();
+								}else{
+									validation = true;
+								}
+
+							} 							
+						}
+					}else{
+						validation = true;
+					}
+				}
+
+				if(validation) {
+					// Update member details by service in background.
+					new SettingsAsyncTask().execute();
+				}				
+			}
+		});
+
+		/**
+		 * This event is triggered when user clicks on Logout button. It clears user session and shows Login screen to user.
+		 */
+		tvLogout.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				new LogoutAsyncTask().execute();
+			}
+		});
+
+		/**
+		 * This click event triggers when user clicks on Profile picture.
+		 * It takes photo with two options. 
+		 * A)Camera B)Picture from Library
+		 * It converts image to rounded shape. 
+		 */
+		tvMProfilePic.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				final CharSequence[] options = {"Take Photo", "Choose from Library", "Cancel"};
+				AlertDialog.Builder builder = new AlertDialog.Builder(Settings.this);
+				builder.setTitle("Add Photo!");
+				builder.setItems(options, new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int option) {
+						if(options[option].equals("Take Photo")) {
+
+							Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+							mImageCaptureUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(),
+									"tmp_avatar_" + String.valueOf(System.currentTimeMillis()) + ".jpg"));
+
+							intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
+							try {
+								intent.putExtra("return-data", true);
+
+								startActivityForResult(intent, REQUEST_CAMERA);
+							} catch (ActivityNotFoundException e) {
+								e.printStackTrace();
+							}
+						}else if(options[option].equals("Choose from Library")) {
+							Intent intent = new Intent();
+
+							intent.setType("image/*");
+							intent.setAction(Intent.ACTION_PICK);
+
+							startActivityForResult(Intent.createChooser(intent, "Complete action using"), SELECT_FILE);
+						}else if(options[option].equals("Cancel")) {
+							dialog.dismiss();
+						}
+					}
+				});
+				builder.show();
+			}
+		});
+
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode == RESULT_OK) {
+			if (requestCode == REQUEST_CAMERA) {
+				doCrop();
+			}
+			else if (requestCode == SELECT_FILE) {
+				mImageCaptureUri = data.getData();
+				doCrop();
+			}else if(requestCode==CROP_FROM_CAMERA){
+				//case CROP_FROM_CAMERA:
+				if(resultCode != 0)
+				{
+					Bundle extras = data.getExtras();
+
+					if (extras != null) {     
+
+						try {
+							bitmapSquare = extras.getParcelable("data");
+							if(getResources().getDisplayMetrics().density==1.5)
+							{
+								bitmapRound = MLRoundedImageView.getCroppedBitmap(bitmapSquare, 123);
+							}else if (getResources().getDisplayMetrics().density==2)
+							{
+								bitmapRound = MLRoundedImageView.getCroppedBitmap(bitmapSquare, 184);
+							}
+							
+							tvMProfilePic.setText("");
+							tvMProfilePic.setBackground(new BitmapDrawable(getResources(), bitmapRound));
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				File f = new File(mImageCaptureUri.getPath());            
+
+				if (f.exists()) f.delete();
+			}
+		}
+	}
+
+
+	private void doCrop() {
+		final ArrayList<CropOption> cropOptions = new ArrayList<CropOption>();
+
+		Intent intent = new Intent("com.android.camera.action.CROP");
+		intent.setType("image/*");
+		//intent.putExtra("circleCrop", true);
+		List<ResolveInfo> list = getPackageManager().queryIntentActivities( intent, 0 );
+
+		int size = list.size();
+
+		if (size == 0) {        
+			Toast.makeText(this, "Can not find image crop app", Toast.LENGTH_SHORT).show();
+
+			return;
+		} else {
+			intent.setData(mImageCaptureUri);
+
+			intent.putExtra("outputX", 100);
+			intent.putExtra("outputY", 100);
+			intent.putExtra("aspectX", 1);
+			intent.putExtra("aspectY", 1);
+			intent.putExtra("scale", true);
+			intent.putExtra("return-data", true);
+
+			if (size == 1) {
+				Intent i = new Intent(intent);
+				ResolveInfo res = list.get(0);
+
+				i.setComponent( new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+
+				startActivityForResult(i, CROP_FROM_CAMERA);
+			} else {
+				for (ResolveInfo res : list) {
+					final CropOption co = new CropOption();
+
+					co.title = getPackageManager().getApplicationLabel(res.activityInfo.applicationInfo);
+					co.icon = getPackageManager().getApplicationIcon(res.activityInfo.applicationInfo);
+					co.appIntent= new Intent(intent);
+
+					co.appIntent.setComponent( new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+
+					cropOptions.add(co);
+				}
+
+				CropOptionAdapter adapter = new CropOptionAdapter(getApplicationContext(), cropOptions);
+
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle("Crop Photo");
+				builder.setAdapter( adapter, new DialogInterface.OnClickListener() {
+					public void onClick( DialogInterface dialog, int item ) {
+						startActivityForResult( cropOptions.get(item).appIntent, CROP_FROM_CAMERA);
+					}
+				});
+
+				builder.setOnCancelListener( new DialogInterface.OnCancelListener() {
+					@Override
+					public void onCancel( DialogInterface dialog ) {
+
+						if (mImageCaptureUri != null ) {
+							getContentResolver().delete(mImageCaptureUri, null, null );
+							mImageCaptureUri = null;
+						}
+					}
+				} );
+
+				AlertDialog alert = builder.create();
+
+				alert.show();
+			}
+		}
+	}
+
+	/**
+	 * This method returns path of the photo image
+	 * @param uri - Image URI
+	 * @param activity - Current activity
+	 * @return path of the image
+	 */
+	public String getPath(Uri uri, Activity activity) {
+		String[] projection = { MediaColumns.DATA };
+		Cursor cursor = activity.managedQuery(uri, projection, null, null, null);
+		int column_index = cursor.getColumnIndexOrThrow(MediaColumns.DATA);
+		cursor.moveToFirst();
+		return cursor.getString(column_index);
+	}
+
+
+	/**
+	 * This class shows user profile image in rounded shape with Asynchronous task.
+	 * @author sunny
+	 *
+	 */
+	class LoadImageAsyncTask extends AsyncTask<Void, Void, Bitmap> {
+
+		String sStatus=null, sMessage=null;
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+		}
+
+		@Override
+		protected Bitmap doInBackground(Void... arg0) {
+			try {
+				// Get image bitmap using URL
+				InputStream is = (InputStream) new URL(loggedInDetails.get("MEMBER_PROFILE_PIC")).getContent();
+				Bitmap bitmapRound = BitmapFactory.decodeStream(is);
+				
+				// Convert bitmap to rounded shape
+				if(getResources().getDisplayMetrics().density==1.5)
+				{
+					bitmapRound = MLRoundedImageView.getCroppedBitmap(bitmapRound, 123);
+				}else if (getResources().getDisplayMetrics().density==2)
+				{
+					bitmapRound = MLRoundedImageView.getCroppedBitmap(bitmapRound, 184);
+				}
+				//bitmapRound = MLRoundedImageView.getCroppedBitmap(bitmapRound, 200);
+				
+				is.close();
+				return bitmapRound;
+			} catch (Exception e) {
+				return null;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap result) {
+
+			if(result!=null) {
+				tvMProfilePic.setText("");
+				tvMProfilePic.setBackground(new BitmapDrawable(getResources(), result));
+			}
+			super.onPostExecute(result);
+		}
+	}
+
+	/**
+	 * This class crops bitmap image to rounded shape
+	 * @author sunny
+	 *
+	 */
+	public static class MLRoundedImageView extends ImageView {
+
+		public MLRoundedImageView(Context context) {
+			super(context);
+		}
+
+		public MLRoundedImageView(Context context, AttributeSet attrs) {
+			super(context, attrs);
+		}
+
+		public MLRoundedImageView(Context context, AttributeSet attrs, int defStyle) {
+			super(context, attrs, defStyle);
+		}
+
+		@Override
+		protected void onDraw(Canvas canvas) {
+
+			Drawable drawable = getDrawable();
+
+			if (drawable == null) {
+				return;
+			}
+
+			if (getWidth() == 0 || getHeight() == 0) {
+				return;
+			}
+			Bitmap b = ((BitmapDrawable) drawable).getBitmap();
+			Bitmap bitmap = b.copy(Bitmap.Config.ARGB_8888, true);
+
+			int w = getWidth();
+
+			Bitmap roundBitmap = getCroppedBitmap(bitmap, w);
+			canvas.drawBitmap(roundBitmap, 0, 0, null);
+
+		}
+
+		/**
+		 * This method crops bitmap image to rounded shape
+		 * @param bmp - Object of bitmap image
+		 * @param radius - Required radius of the bitmap image
+		 * @return cropped bitmap image with rounded shape
+		 */
+		public static Bitmap getCroppedBitmap(Bitmap bmp, int radius) {
+			Bitmap sbmp;
+
+			if (bmp.getWidth() != radius || bmp.getHeight() != radius) {
+				float smallest = Math.min(bmp.getWidth(), bmp.getHeight());
+				float factor = smallest / radius;
+				sbmp = Bitmap.createScaledBitmap(bmp, (int)(bmp.getWidth() / factor), (int)(bmp.getHeight() / factor), false);
+			} else {
+				sbmp = bmp;
+			}
+
+			Bitmap output = Bitmap.createBitmap(radius, radius,
+					Config.ARGB_8888);
+			Canvas canvas = new Canvas(output);
+
+			final Paint paint = new Paint();
+			final Rect rect = new Rect(0, 0, radius, radius);
+
+			paint.setAntiAlias(true);
+			paint.setFilterBitmap(true);
+			paint.setDither(true);
+			canvas.drawARGB(0, 0, 0, 0);
+			paint.setColor(Color.parseColor("#BAB399"));
+			canvas.drawCircle(radius / 2 + 0.7f,
+					radius / 2 + 0.7f, radius / 2 + 0.1f, paint);
+			paint.setXfermode(new PorterDuffXfermode(android.graphics.PorterDuff.Mode.SRC_IN));
+			canvas.drawBitmap(sbmp, rect, rect, paint);
+
+			return output;
+		}
+
+	}
+
+	/**
+	 * This class saves User details using service in background. After that it shows Categories screen to user.
+	 * @author sunny
+	 *
+	 */
+	class SettingsAsyncTask extends AsyncTask<Void, Void, String> {
+
+		ProgressDialog pd;
+		String sStatus=null, sMessage=null;
+
+		@Override
+		protected void onPreExecute() {
+			pd = new ProgressDialog(Settings.this);
+			pd.setIndeterminate(true);
+			pd.setCancelable(false);
+			pd.setMessage("Please wait...");
+			pd.show();
+			super.onPreExecute();
+		}
+
+		@Override
+		protected String doInBackground(Void... arg0) {
+			try {
+				
+				// Check network connection to call service 
+				checkNet = Utils.isInternetAvailable(Settings.this);
+				
+				if(checkNet){
+					String URL = getResources().getString(R.string.URL);
+
+					HttpClient client = new DefaultHttpClient();
+					HttpPost post = new HttpPost(URL);
+					MultipartEntity multiEntity = new MultipartEntity();
+
+
+					// Pass values to service
+
+					// Static values
+					multiEntity.addPart("call", new StringBody("changeSettings"));
+
+					multiEntity.addPart("userID", new StringBody(mId));
+					multiEntity.addPart("oldPassword", new StringBody(etMOldPassword.getText().toString()));
+					multiEntity.addPart("newPassword", new StringBody(etMNewPassword.getText().toString()));
+
+					if(bitmapSquare!=null) {
+						multiEntity.addPart("profilePic", bob);
+					}
+
+					multiEntity.addPart("email", new StringBody(etMEmail.getText().toString()));
+
+
+					post.setEntity(multiEntity);
+					HttpResponse response = client.execute(post);
+					String res = EntityUtils.toString(response.getEntity());
+
+					//Log.v("response", "Response: " + res);
+					jsonResponse = new JSONObject(res);
+
+					sStatus = jsonResponse.getString("Status");
+					sMessage = jsonResponse.getString("Message");
+					Log.e("Check", sStatus);
+					if(sStatus.equalsIgnoreCase("Success")) {
+						return "success";
+					}
+
+					if(!sMessage.equalsIgnoreCase("OK")) {
+						return sMessage;
+					}					
+				}
+
+			}catch(UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}catch(ClientProtocolException e) {
+				e.printStackTrace();
+			}catch(IOException e){
+				e.printStackTrace();
+			}catch(JSONException e){
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+
+			if(pd.isShowing()){
+
+				if(!checkNet){
+					pd.dismiss();
+					Toast.makeText(Settings.this, "Please check network connection", Toast.LENGTH_SHORT).show();
+				}else if(result.equalsIgnoreCase("success")) {
+
+					// Show status message to user
+					Toast.makeText(getApplicationContext(), "Your details are updated successfully", Toast.LENGTH_LONG).show();
+					HashMap<String, String> hMapSignUpDetails = new HashMap<String,String>();
+
+					// Store user details in session using SessionStorage.java
+					try {
+						JSONArray jsonArray = jsonResponse.getJSONArray("Result");
+						for (int i = 0; i < jsonArray.length(); i++) {
+							JSONObject resultObj = jsonArray.getJSONObject(i);
+
+							hMapSignUpDetails.put("MEMBER_ID", resultObj.getString("userID"));
+							hMapSignUpDetails.put("MEMBER_NAME", resultObj.getString("name"));
+							hMapSignUpDetails.put("MEMBER_EMAIL", resultObj.getString("email"));
+							hMapSignUpDetails.put("MEMBER_PROFILE_PIC", resultObj.getString("profilePic"));
+							hMapSignUpDetails.put("MEMBER_PHONE", resultObj.getString("phone"));
+							hMapSignUpDetails.put("MEMBER_ADMIN_ID", resultObj.getString("adminID"));
+							hMapSignUpDetails.put("MEMBER_ROLE", resultObj.getString("role"));
+							hMapSignUpDetails.put("MEMBER_MEMBERSHIP", resultObj.getString("membershipStatus"));
+							hMapSignUpDetails.put("MEMBER_CREATED_ON", resultObj.getString("createdOn"));
+						}
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+
+					SessionStorage sessionStorage=new SessionStorage(getApplicationContext());
+					sessionStorage.storeLoginDetails(hMapSignUpDetails);
+
+					pd.dismiss();
+
+					// Navigate to Categories
+					Intent menu = new Intent(Settings.this, Categories.class);
+					startActivity(menu);
+					finish();
+					
+				}else {
+					pd.dismiss();
+
+					// Show status message to user
+					Toast.makeText(getApplicationContext(), result, Toast.LENGTH_LONG).show();
+				}
+
+			}
+			super.onPostExecute(result);
+		}
+	}	
+
+
+	/**
+	 * This class clears user's session using service in background and navigate to Login screen.
+	 * @author sunny
+	 *
+	 */
+	class LogoutAsyncTask extends AsyncTask<Void, Void, String> {
+
+		ProgressDialog pd;
+		String sStatus=null, sMessage=null;
+
+		@Override
+		protected void onPreExecute() {
+			pd = new ProgressDialog(Settings.this);
+			pd.setIndeterminate(true);
+			pd.setCancelable(false);
+			pd.setMessage("Please wait..");
+			pd.show();
+			super.onPreExecute();
+		}
+
+		@Override
+		protected String doInBackground(Void... arg0) {
+			try {
+				
+				// Check network connection to call service 
+				checkNet = Utils.isInternetAvailable(Settings.this);
+				
+				if(checkNet){
+					String URL = getResources().getString(R.string.URL);
+
+					HttpClient client = new DefaultHttpClient();
+					HttpPost post = new HttpPost(URL);
+					MultipartEntity multiEntity = new MultipartEntity();
+
+
+					// Pass values to service
+
+					// Static values
+					multiEntity.addPart("call", new StringBody("logout"));
+
+					multiEntity.addPart("phone", new StringBody(mPhone));
+
+					post.setEntity(multiEntity);
+					HttpResponse response = client.execute(post);
+					String res = EntityUtils.toString(response.getEntity());
+
+					//Log.v("response", "Response: " + res);
+					jsonResponse = new JSONObject(res);
+
+					sStatus = jsonResponse.getString("Status");
+					sMessage = jsonResponse.getString("Message");
+
+					if(sStatus.equalsIgnoreCase("Success")) {
+						return "success";
+					}
+
+					if(!sMessage.equalsIgnoreCase("OK")) {
+						return sMessage;
+					}					
+				}
+
+			}catch(UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}catch(ClientProtocolException e) {
+				e.printStackTrace();
+			}catch(IOException e){
+				e.printStackTrace();
+			}catch(JSONException e){
+				e.printStackTrace();
+			}
+			return null;
+
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+
+			if(pd.isShowing()){
+				if(result.equalsIgnoreCase("success")) {
+
+					pd.dismiss();
+
+					if(!checkNet){
+						pd.dismiss();
+						Toast.makeText(Settings.this, "Please check network connection", Toast.LENGTH_SHORT).show();
+					}else if(result.equals("success")) {
+						// Clear session data
+						sessionStorage.clearKeys();
+
+						// Show status message to user
+						Toast.makeText(getApplicationContext(), "You have been logout successfully", Toast.LENGTH_LONG).show();
+
+						// Navigate to Login screen
+						Intent menu = new Intent(Settings.this, Login.class);
+						startActivity(menu);
+						finish();	
+					}
+
+				}else{
+					pd.dismiss();
+
+					Toast.makeText(getApplicationContext(), result, Toast.LENGTH_LONG).show();
+				}
+			}
+			super.onPostExecute(result);
+		}
+	}
+
+	@Override
+	public void onBackPressed() {
+		Intent categoriesIntent = new Intent(Settings.this, Categories.class);
+		startActivity(categoriesIntent);
+		finish();
+		super.onBackPressed();
+	}	
+
+}

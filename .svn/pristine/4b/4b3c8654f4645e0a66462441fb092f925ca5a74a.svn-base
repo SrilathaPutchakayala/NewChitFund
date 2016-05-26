@@ -1,0 +1,520 @@
+/**
+ * Project Name	: Chitfund
+ * Class Name	: SignUp
+ * Date			: 29--05-2014, 11:50 AM
+ * Developer	: Sanyasi Rao
+ * Company		: Sagarsoft India Ltd.
+ * 
+ * Description  :		
+ * ------------------------------------------------------------------------------------------------------------------------------------------
+ * This class shows user a registration form with the following fields - Profile picture, Name, Email, Phone Number and Password.
+ * 
+ * Validations to user input data.
+ * 1) Phone number should not contain more than 10 digits.
+ * 2) Phone number should not contain all zeros.
+ * 3) Password should contain minimum 2 characters.  
+
+ * It saves users data using service. It saves image in External Storage Device.
+ * 
+ * On clicking 'Back Icon', it shows user Login screen.
+ * On clicking DONE button, it shows user Menu screen after successful registration.
+ * ------------------------------------------------------------------------------------------------------------------------------------------
+ */
+package com.newchitfund.androidclient;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.regex.Pattern;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.provider.MediaStore.MediaColumns;
+
+/**
+ * This class do actions for Sign Up screen like add user data using service, validation of data
+ * @author sunny
+ * 
+ */
+public class SignUp extends Activity {
+	
+	private ImageView ivBackIcon;
+	private Button btnDone;
+	private ImageView ivMProfilePic;
+	private EditText etMName;
+	private EditText etMEmail;
+	private EditText etMPhone;
+	private EditText etMPassword;
+	private TextView tvSignUp;
+	public String etMNameVal=null, etMEmailVal=null, etMPhoneVal=null, etMPasswordVal=null;
+	public JSONObject jsonResponse;
+	protected final static int REQUEST_CAMERA = 0;
+	protected final static int SELECT_FILE = 1;
+	protected Bitmap bm;
+	byte[] ivMProfilePicInByte;
+	protected ByteArrayBody bob;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.sign_up);
+		
+		btnDone = (Button) findViewById(R.id.btn_done);
+		ivMProfilePic = (ImageView) findViewById(R.id.iv_picCircle);
+		ivBackIcon = (ImageView) findViewById(R.id.iv_backIcon);
+		
+		/**
+		 * This click event triggers when user clicks on Back Icon - top left position of the screen.
+		 * It shows user Login screen.
+		 */
+		ivBackIcon.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent menu = new Intent(SignUp.this, Login.class);
+				startActivity(menu);
+				finish();
+			}
+		});
+		
+		/**
+		 * This click event triggers when user clicks on Profile picture.
+		 * It takes photo with two options. 
+		 * A)Camera B)Picture from Library
+		 * It converts image to rounded shape. 
+		 */
+		ivMProfilePic.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				final CharSequence[] options = {"Take Photo", "Choose from Library", "Cancel"};
+				AlertDialog.Builder builder = new AlertDialog.Builder(SignUp.this);
+				builder.setTitle("Add Photo!");
+				builder.setItems(options, new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int option) {
+						// TODO Auto-generated method stub
+						if(options[option].equals("Take Photo")) {
+							Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+							File imgFile = new File(android.os.Environment.getExternalStorageDirectory(), "temp.png");
+							intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(imgFile));
+							startActivityForResult(intent, REQUEST_CAMERA);
+						}else if(options[option].equals("Choose from Library")) {
+							Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+							intent.setType("image/*");
+							startActivityForResult(Intent.createChooser(intent, "Select File"), SELECT_FILE);
+						}else if(options[option].equals("Cancel")) {
+							dialog.dismiss();
+						}
+					}
+				});
+				builder.show();
+			}
+		});
+		
+		/**
+		 * This click event triggers when user clicks on DONE button.
+		 * It receives data from template file.
+		 * It validates member details.
+		 * It converts image to bytes to save the image bytes in database.
+		 * It sends data to database by service when validation of data is successful. 
+		 */
+		btnDone.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+				Boolean validation = true;
+				
+				ivMProfilePic = (ImageView) findViewById(R.id.iv_picCircle);
+				etMName = (EditText) findViewById(R.id.et_name);
+				etMEmail = (EditText) findViewById(R.id.et_email);
+				etMPhone = (EditText) findViewById(R.id.et_phone);
+				etMPassword = (EditText) findViewById(R.id.et_password);
+				
+				tvSignUp = (TextView) findViewById(R.id.tv_signUp); // Unused variable
+				
+				etMName.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+				etMEmail.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+				etMPhone.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+				etMPassword.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+				tvSignUp.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+				btnDone.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+				
+				etMNameVal = etMName.getText().toString();
+				etMEmailVal = etMEmail.getText().toString();
+				etMPhoneVal = etMPhone.getText().toString();
+				etMPasswordVal = etMPassword.getText().toString();
+				
+				// Convert bitmap to bytes
+				if(bm!=null) {
+					ByteArrayOutputStream stream = new ByteArrayOutputStream();
+					bm.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+					ivMProfilePicInByte = stream.toByteArray();	
+					bob = new ByteArrayBody(ivMProfilePicInByte, "temp.png");
+				}
+				
+				
+				ArrayList<String> mInput = new ArrayList<String>();
+				mInput.add(etMNameVal);
+				mInput.add(etMEmailVal);
+				mInput.add(etMPhoneVal);
+				mInput.add(etMPasswordVal);
+				
+				// Member input validation
+   			    int combinations = 0;
+				if(Pattern.compile("[0-9]").matcher(etMPasswordVal).find()) {
+				        combinations = combinations + 10;
+				}
+				    
+				if(etMPasswordVal.length()<3) {
+					validation = false;
+					Toast.makeText(getApplicationContext(), "Password should not be less than 3 characters", Toast.LENGTH_LONG).show();
+				}
+				
+				if(combinations==0) {
+					validation = false;
+					Toast.makeText(getApplicationContext(), "Password should contain at least one number", Toast.LENGTH_LONG).show();
+				}
+				
+				if(checkEmpty(mInput)) {
+					validation = false;
+					Toast.makeText(getApplicationContext(), "Please enter all fields", Toast.LENGTH_LONG).show();
+				}
+				
+				if(validation) {
+					new SignUpAsyncTask().execute();
+				}
+				
+			}
+			
+		});
+		
+	}
+
+	/**
+	 * This method checks empty values of an array list
+	 * @return boolean value 'true' when the given input is empty else boolean value 'false'
+	 */
+	protected boolean checkEmpty(ArrayList<String> mInput) {
+		// TODO Auto-generated method stub
+		int i=0;
+		
+		for(i=0; i<mInput.size(); i++) {
+			
+			if(mInput.get(i)==null || mInput.get(i).length()<=0){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode == RESULT_OK) {
+			if (requestCode == REQUEST_CAMERA) {
+				File f = new File(Environment.getExternalStorageDirectory().toString());
+				
+				for (File temp : f.listFiles()) {
+					if (temp.getName().equals("temp.png")) {
+						f = temp;
+						break;
+					}
+				}
+				
+				try {
+					
+					BitmapFactory.Options btmapOptions = new BitmapFactory.Options();
+
+					bm = BitmapFactory.decodeFile(f.getAbsolutePath(),
+							btmapOptions);
+
+					bm = MLRoundedImageView.getCroppedBitmap(bm, 200);
+					ivMProfilePic.setImageBitmap(bm);
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} else if (requestCode == SELECT_FILE) {
+				Uri selectedImageUri = data.getData();
+
+				String tempPath = getPath(selectedImageUri, SignUp.this);
+				BitmapFactory.Options btmapOptions = new BitmapFactory.Options();
+				bm = BitmapFactory.decodeFile(tempPath, btmapOptions);
+				bm = MLRoundedImageView.getCroppedBitmap(bm, 200);
+				ivMProfilePic.setImageBitmap(bm);
+			}
+		}
+	}
+	
+	/**
+	 * This method returns path of the photo image
+	 * @param uri - Image URI
+	 * @param activity - Current activity
+	 * @return path of the image
+	 */
+	public String getPath(Uri uri, Activity activity) {
+		String[] projection = { MediaColumns.DATA };
+		Cursor cursor = activity.managedQuery(uri, projection, null, null, null);
+		int column_index = cursor.getColumnIndexOrThrow(MediaColumns.DATA);
+		cursor.moveToFirst();
+		return cursor.getString(column_index);
+	}
+	
+	/**
+	 * Class to add new user details in background 
+	 * @author sunny
+	 * 
+	 */
+	class SignUpAsyncTask extends AsyncTask<Void, Void, String> {
+		
+		ProgressDialog pd;
+		String sStatus=null, sMessage=null;
+		
+		@Override
+		protected void onPreExecute() {
+			pd = new ProgressDialog(SignUp.this);
+			pd.setIndeterminate(true);
+			pd.setCancelable(false);
+			pd.setMessage("Registration is in process");
+			pd.show();
+			super.onPreExecute();
+		}
+
+		@Override
+		protected String doInBackground(Void... arg0) {
+			// TODO Auto-generated method stub
+			try {
+				
+				String URL = getResources().getString(R.string.URL);
+				String adminID = getResources().getString(R.string.adminID);
+				
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(URL);
+				MultipartEntity multiEntity = new MultipartEntity();
+				
+				multiEntity.addPart("name", new StringBody(etMName.getText().toString()));				
+				multiEntity.addPart("email", new StringBody(etMEmail.getText().toString()));
+				multiEntity.addPart("phone", new StringBody(etMPhone.getText().toString()));
+				multiEntity.addPart("password", new StringBody(etMPassword.getText().toString()));
+				
+				if(bm!=null)
+				{
+					multiEntity.addPart("profilePic", bob);
+				}
+
+				// Value from strings.xml
+				multiEntity.addPart("adminID", new StringBody(adminID));
+				
+				// Static values
+				multiEntity.addPart("call", new StringBody("registerUser"));
+				multiEntity.addPart("deviceType", new StringBody("Android/IOS"));
+				multiEntity.addPart("deviceToken", new StringBody("ASD123A"));
+				
+				post.setEntity(multiEntity);
+				HttpResponse response = client.execute(post);
+				String res = EntityUtils.toString(response.getEntity());
+				
+				Log.v("response", "Response: " + res);
+				jsonResponse = new JSONObject(res);
+				
+				sStatus = jsonResponse.getString("Status");
+				sMessage = jsonResponse.getString("Message");
+				
+				if(sStatus.equalsIgnoreCase("Success")) {
+					return "success";
+				}
+				if(!sMessage.equalsIgnoreCase("OK")) {
+					return sMessage;
+				}
+				
+			}catch(UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}catch(ClientProtocolException e) {
+				e.printStackTrace();
+			}catch(IOException e){
+				e.printStackTrace();
+			}catch(JSONException e){
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(String result) {
+			
+			if(pd.isShowing()){
+				if(result.equalsIgnoreCase("success")) {
+					Toast.makeText(getApplicationContext(), "You are registered successfully", Toast.LENGTH_LONG).show();
+					HashMap<String, String> hMapSignUpDetails = new HashMap<String,String>();
+
+					// Store values in SessionStorage.java
+					try {
+						
+						hMapSignUpDetails.put("MEMBER_ID", jsonResponse.getString("userID"));
+						hMapSignUpDetails.put("MEMBER_NAME", jsonResponse.getString("name"));
+						hMapSignUpDetails.put("MEMBER_EMAIL", jsonResponse.getString("email"));
+						hMapSignUpDetails.put("MEMBER_PROFILE_PIC", jsonResponse.getString("profilePic"));
+						hMapSignUpDetails.put("MEMBER_PHONE", jsonResponse.getString("phone"));
+						hMapSignUpDetails.put("MEMBER_ADMIN_ID", jsonResponse.getString("adminID"));
+						hMapSignUpDetails.put("MEMBER_ROLE", jsonResponse.getString("role"));
+						hMapSignUpDetails.put("MEMBER_MEMBERSHIP", jsonResponse.getString("membershipStatus"));
+						hMapSignUpDetails.put("MEMBER_CREATED_ON", jsonResponse.getString("createdOn"));
+						
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					SessionStorage sessionStorage=new SessionStorage(getApplicationContext());
+					sessionStorage.storeLoginDetails(hMapSignUpDetails);
+				}
+				pd.dismiss();
+				
+				// Navigate to Menu
+				Intent menu = new Intent(SignUp.this, Menu.class);
+				startActivity(menu);
+				finish();
+			}
+			super.onPostExecute(result);
+		}
+	}
+
+	/**
+	 * This class crops bitmap image to round shape
+	 * @author sunny
+	 *
+	 */
+	public static class MLRoundedImageView extends ImageView {
+		 
+		public MLRoundedImageView(Context context) {
+			super(context);
+		}
+	 
+		public MLRoundedImageView(Context context, AttributeSet attrs) {
+			super(context, attrs);
+		}
+	 
+		public MLRoundedImageView(Context context, AttributeSet attrs, int defStyle) {
+			super(context, attrs, defStyle);
+		}
+	 
+		@Override
+		protected void onDraw(Canvas canvas) {
+	 
+			Drawable drawable = getDrawable();
+	 
+			if (drawable == null) {
+				return;
+			}
+	 
+			if (getWidth() == 0 || getHeight() == 0) {
+				return;
+			}
+			Bitmap b = ((BitmapDrawable) drawable).getBitmap();
+			Bitmap bitmap = b.copy(Bitmap.Config.ARGB_8888, true);
+	 
+			int w = getWidth();
+	 
+			Bitmap roundBitmap = getCroppedBitmap(bitmap, w);
+			canvas.drawBitmap(roundBitmap, 0, 0, null);
+	 
+		}
+		
+		/**
+		 * This method crops bitmap image to round shape
+		 * @param bmp - Object of bitmap image
+		 * @param radius - Required radius of the bitmap image
+		 * @return cropped bitmap image with round shape
+		 */
+		public static Bitmap getCroppedBitmap(Bitmap bmp, int radius) {
+			Bitmap sbmp;
+			
+			if (bmp.getWidth() != radius || bmp.getHeight() != radius) {
+				float smallest = Math.min(bmp.getWidth(), bmp.getHeight());
+				float factor = smallest / radius;
+				sbmp = Bitmap.createScaledBitmap(bmp, (int)(bmp.getWidth() / factor), (int)(bmp.getHeight() / factor), false);
+			} else {
+				sbmp = bmp;
+			}
+			
+			Bitmap output = Bitmap.createBitmap(radius, radius,
+					Config.ARGB_8888);
+			Canvas canvas = new Canvas(output);
+	 
+			final Paint paint = new Paint();
+			final Rect rect = new Rect(0, 0, radius, radius);
+	 
+			paint.setAntiAlias(true);
+			paint.setFilterBitmap(true);
+			paint.setDither(true);
+			canvas.drawARGB(0, 0, 0, 0);
+			paint.setColor(Color.parseColor("#BAB399"));
+			canvas.drawCircle(radius / 2 + 0.7f,
+					radius / 2 + 0.7f, radius / 2 + 0.1f, paint);
+			paint.setXfermode(new PorterDuffXfermode(android.graphics.PorterDuff.Mode.SRC_IN));
+			canvas.drawBitmap(sbmp, rect, rect, paint);
+	 
+			return output;
+		}
+	 
+	}	
+	
+	@Override
+	public void onBackPressed() {
+		Intent menu = new Intent(SignUp.this, Login.class);
+		startActivity(menu);
+		finish();
+		super.onBackPressed();
+	}
+}

@@ -1,0 +1,99 @@
+<resources>
+
+    <!-- Common dimensions for all screens -->
+    <dimen name="action_bar_title_size">18sp</dimen>
+    <dimen name="pop_up_title_size">16sp</dimen>
+
+    <!-- Dimensions of Sign up screen -->
+    <dimen name="tv_backIcon">19sp</dimen>
+    <dimen name="tv_picCircle">14sp</dimen>
+    <dimen name="et_name">16sp</dimen>
+    <dimen name="et_email">16sp</dimen>
+    <dimen name="et_phone">16sp</dimen>
+    <dimen name="et_password">16sp</dimen>
+    <dimen name="et_confirmPassword">16sp</dimen>
+    
+    <!-- Dimensions of Login screen -->
+    <dimen name="et_mUsername">13sp</dimen>
+    <dimen name="et_mPassword">13sp</dimen>
+    <dimen name="tv_forgotPassword">11sp</dimen>
+    <dimen name="tv_notMember">13sp</dimen>
+    <dimen name="tv_signUp">13sp</dimen>
+    
+    <!-- Dimensions of Settings screen -->
+    <dimen name="tv_back">18sp</dimen>
+    <dimen name="tv_profPic">14sp</dimen>
+    <dimen name="et_mName">16sp</dimen>
+    <dimen name="et_mEmail">16sp</dimen>
+    <dimen name="et_mPhone">16sp</dimen>
+    <dimen name="et_mOldPassword">16sp</dimen>
+    <dimen name="et_mNewPassword">16sp</dimen>
+    <dimen name="et_mConfirmPassword">16sp</dimen>
+    <dimen name="tv_logout">16sp</dimen>
+    
+    <!-- Dimensions of Categories screen -->
+    <dimen name="btn_categoriesLabel">19sp</dimen>
+    
+    <!-- Dimensions of Chit History screen -->
+    <dimen name="tv_view_chits_action_bar_title">13sp</dimen>
+    
+    <!-- View Chits Screen dimensions -->
+    <dimen name="view_chits_chit_name_size">15sp</dimen>
+    <dimen name="view_chits_amount_size">15sp</dimen>
+    <dimen name="view_chits_date_size">11.5sp</dimen>
+
+    <!-- Chits Details Screen dimensions -->
+    <dimen name="table_row_margin_top">1dp</dimen>
+    <dimen name="table_row_margin_right">1dp</dimen>
+    <dimen name="table_first_col_width">125dp</dimen>
+    <dimen name="table_cell_height">37dp</dimen>
+    <dimen name="table_cell_padding">6dp</dimen>
+    <dimen name="table_cell_text_size">15sp</dimen>
+
+    <!-- Bidding List Screen dimensions -->
+    <dimen name="bidding_list_member_name_width">162dp</dimen>
+    <dimen name="bidding_list_member_name_size">16sp</dimen>
+    <dimen name="bidding_list_member_name_small_size">11sp</dimen>
+    <dimen name="bidding_list_bid_date_size">11sp</dimen>
+    <dimen name="bidding_list_amount_size">16sp</dimen>
+    <dimen name="bidding_list_amount_small_size">11sp</dimen>
+
+    <!-- Members List Screen dimensions -->
+    <dimen name="members_list_member_name_width">135dp</dimen>
+    <dimen name="members_list_member_name_size">16sp</dimen>
+    <dimen name="members_list_member_name_small_size">11sp</dimen>
+    <dimen name="members_list_bid_date_width">162dp</dimen>
+    <dimen name="members_list_bid_date_size">11dp</dimen>
+    <dimen name="members_list_amount_size">16sp</dimen>
+    <dimen name="members_list_amount_small_size">11sp</dimen>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+
+    <!-- Chit Creation Screen dimensions -->
+    <dimen name="chitsCreationLabels">16sp</dimen>
+    <dimen name="chitsCreationHeadding">18sp</dimen>
+     <dimen name="chitsCancelMargin">5dp</dimen>
+     <dimen name="chitsSubHeadingMargin">5dp</dimen>
+     <dimen name="chitsFieldMarginLeft">124dp</dimen>
+    <dimen name="chitsFieldMarginRight">10dp</dimen>
+    <dimen name="chitsFieldAddMemberMarginLeft">114dp</dimen>
+    <dimen name="chitsFieldMarginTop">10dp</dimen>
+    
+    <!-- Add member Screen dimensions -->
+    <dimen name="addMemberaddMemberhead">18sp</dimen>
+    <dimen name="addMemberLabels">16sp</dimen>
+    <dimen name="addMemberEditText">13sp</dimen>
+    <dimen name="addMemberNameList">15sp</dimen>
+    <dimen name="addMemberMobileList">12sp</dimen>
+    <dimen name="addMemberAZIndex">13sp</dimen>
+     <dimen name="addMemberSearchName">15sp</dimen>
+    
+    <!--Payment Screen dimensions -->
+      <dimen name="paymentHeader">18sp</dimen>
+      <dimen name="paymentMonth">14sp</dimen>
+      <dimen name="paymentListText">16sp</dimen>
+
+</resources>

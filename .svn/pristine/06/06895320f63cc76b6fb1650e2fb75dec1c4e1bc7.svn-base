@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:background="#505F63"
+        android:padding="10dp" >
+
+        <ImageView
+            android:id="@+id/iv_chit_details_back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="goBack"
+            android:src="@drawable/back_button" />
+
+        <TextView
+            android:id="@+id/tv_chit_details_action_bar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="@string/chit_details"
+            android:textColor="@color/White"
+            android:textSize="20sp" />
+
+        <ImageView
+            android:id="@+id/iv_chit_details_edit_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/edit_button" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/green_border"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/table_row_margin_right"
+            android:layout_marginTop="@dimen/table_row_margin_top"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="@dimen/table_first_col_width"
+                android:layout_height="@dimen/table_cell_height"
+                android:background="@drawable/white_border_bottom"
+                android:gravity="center_vertical"
+                android:paddingLeft="@dimen/table_cell_padding"
+                android:paddingRight="0dp"
+                android:text="@string/chit_name"
+                android:textColor="@color/White"
+                android:textSize="@dimen/table_cell_text_size"/>
+
+            <TextView
+                android:id="@+id/tv_chitName"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/table_cell_height"
+                android:layout_weight="1"
+                android:background="@drawable/green_border_bottom"
+                android:gravity="center_vertical"
+                android:padding="@dimen/table_cell_padding"
+                android:text="@string/chit_name"
+                android:textColor="@color/Black"
+                android:textSize="@dimen/table_cell_text_size" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/table_row_margin_right"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="@dimen/table_first_col_width"
+                android:layout_height="@dimen/table_cell_height"
+                android:background="@drawable/white_border_bottom"
+                android:gravity="center_vertical"
+                android:paddingLeft="@dimen/table_cell_padding"
+                android:paddingRight="0dp"
+                android:text="@string/owner_name"
+                android:textColor="@color/White"
+                android:textSize="@dimen/table_cell_text_size" />
+
+            <TextView
+                android:id="@+id/tv_ownerName"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/table_cell_height"
+                android:layout_weight="1"
+                android:background="@drawable/green_border_bottom"
+                android:gravity="center_vertical"
+                android:paddingLeft="@dimen/table_cell_padding"
+                android:paddingRight="0dp"
+                android:text="@string/owner_name"
+                android:textColor="@color/Black"
+                android:textSize="@dimen/table_cell_text_size" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/table_row_margin_right"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="@dimen/table_first_col_width"
+                android:layout_height="@dimen/table_cell_height"
+                android:background="@drawable/white_border_bottom"
+                android:gravity="center_vertical"
+                android:paddingLeft="@dimen/table_cell_padding"
+                android:paddingRight="0dp"
+                android:text="@string/total_amount"
+                android:textColor="@color/White"
+                android:textSize="@dimen/table_cell_text_size" />
+
+            <TextView
+                android:id="@+id/tv_totalAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/table_cell_height"
+                android:layout_weight="1"
+                android:background="@drawable/green_border_bottom"
+                android:gravity="center_vertical"
+                android:paddingLeft="@dimen/table_cell_padding"
+                android:paddingRight="0dp"
+                android:text="@string/total_amount"
+                android:textColor="@color/Black"
+                android:textSize="@dimen/table_cell_text_size" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/table_row_margin_right"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="@dimen/table_first_col_width"
+                android:layout_height="@dimen/table_cell_height"
+                android:background="@drawable/white_border_bottom"
+                android:gravity="center_vertical"
+                android:paddingLeft="@dimen/table_cell_padding"
+                android:paddingRight="0dp"
+                android:text="@string/no_of_members"
+                android:textColor="@color/White"
+                android:textSize="@dimen/table_cell_text_size" />
+
+            <TextView
+                android:id="@+id/tv_noOfMembers"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/table_cell_height"
+                android:layout_weight="1"
+                android:background="@drawable/green_border_bottom"
+                android:gravity="center_vertical"
+                android:paddingLeft="@dimen/table_cell_padding"
+                android:paddingRight="0dp"
+                android:text="@string/no_of_members"
+                android:textColor="@color/Black"
+                android:textSize="@dimen/table_cell_text_size" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/table_row_margin_right"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="@dimen/table_first_col_width"
+                android:layout_height="@dimen/table_cell_height"
+                android:background="@drawable/white_border_bottom"
+                android:gravity="center_vertical"
+                android:paddingLeft="@dimen/table_cell_padding"
+                android:paddingRight="0dp"
+                android:text="@string/no_of_months"
+                android:textColor="@color/White"
+                android:textSize="@dimen/table_cell_text_size" />
+
+            <TextView
+                android:id="@+id/tv_noOfMonths"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/table_cell_height"
+                android:layout_weight="1"
+                android:background="@drawable/green_border_bottom"
+                android:gravity="center_vertical"
+                android:paddingLeft="@dimen/table_cell_padding"
+                android:paddingRight="0dp"
+                android:text="@string/no_of_months"
+                android:textColor="@color/Black"
+                android:textSize="@dimen/table_cell_text_size" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/table_row_margin_right"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="@dimen/table_first_col_width"
+                android:layout_height="@dimen/table_cell_height"
+                android:background="@drawable/white_border_bottom"
+                android:gravity="center_vertical"
+                android:paddingLeft="@dimen/table_cell_padding"
+                android:paddingRight="0dp"
+                android:text="@string/start_date"
+                android:textColor="@color/White"
+                android:textSize="@dimen/table_cell_text_size" />
+
+            <TextView
+                android:id="@+id/tv_startDate"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/table_cell_height"
+                android:layout_weight="1"
+                android:background="@drawable/green_border_bottom"
+                android:gravity="center_vertical"
+                android:padding="@dimen/table_cell_padding"
+                android:text="@string/start_date"
+                android:textColor="@color/Black"
+                android:textSize="@dimen/table_cell_text_size" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/table_row_margin_right"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="@dimen/table_first_col_width"
+                android:layout_height="@dimen/table_cell_height"
+                android:background="@drawable/white_border_bottom"
+                android:gravity="center_vertical"
+                android:paddingLeft="@dimen/table_cell_padding"
+                android:paddingRight="0dp"
+                android:text="@string/pay_date"
+                android:textColor="@color/White"
+                android:textSize="@dimen/table_cell_text_size" />
+
+            <TextView
+                android:id="@+id/tv_payDate"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/table_cell_height"
+                android:layout_weight="1"
+                android:background="@drawable/green_border_bottom"
+                android:gravity="center_vertical"
+                android:padding="@dimen/table_cell_padding"
+                android:text="@string/pay_date"
+                android:textColor="@color/Black"
+                android:textSize="@dimen/table_cell_text_size" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/table_row_margin_right"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="@dimen/table_first_col_width"
+                android:layout_height="@dimen/table_cell_height"
+                android:background="@drawable/white_border_bottom"
+                android:gravity="center_vertical"
+                android:paddingLeft="@dimen/table_cell_padding"
+                android:paddingRight="0dp"
+                android:text="@string/bid_date"
+                android:textColor="@color/White"
+                android:textSize="@dimen/table_cell_text_size" />
+
+            <TextView
+                android:id="@+id/tv_bidDate"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/table_cell_height"
+                android:layout_weight="1"
+                android:background="@drawable/green_border_bottom"
+                android:gravity="center_vertical"
+                android:padding="@dimen/table_cell_padding"
+                android:text="@string/bid_date"
+                android:textColor="@color/Black"
+                android:textSize="@dimen/table_cell_text_size" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="0dp"
+            android:layout_marginRight="@dimen/table_row_margin_right"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="@dimen/table_first_col_width"
+                android:layout_height="@dimen/table_cell_height"
+                android:background="@drawable/green_inner_green_border_bottom"
+                android:gravity="center_vertical"
+                android:paddingLeft="@dimen/table_cell_padding"
+                android:paddingRight="0dp"
+                android:text="@string/owner_month"
+                android:textColor="@color/White"
+                android:textSize="@dimen/table_cell_text_size" />
+
+            <TextView
+                android:id="@+id/tv_ownerMonth"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/table_cell_height"
+                android:layout_weight="1"
+                android:background="@drawable/green_border_bottom"
+                android:gravity="center_vertical"
+                android:padding="@dimen/table_cell_padding"
+                android:text="@string/owner_month"
+                android:textColor="@color/Black"
+                android:textSize="@dimen/table_cell_text_size" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp">
+
+        <ImageView
+            android:id="@+id/iv_Bidding_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/bidding_button" />
+        
+        <ImageView
+            android:id="@+id/iv_Members_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/members_button" />
+        
+        <ImageView
+            android:id="@+id/iv_Reports_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/reports_button" />
+        
+    </RelativeLayout>
+
+</LinearLayout>

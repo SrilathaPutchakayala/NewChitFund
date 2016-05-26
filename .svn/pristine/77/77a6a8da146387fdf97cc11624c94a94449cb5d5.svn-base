@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#fff" >
+    
+    <RelativeLayout
+        android:id="@+id/headLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/top_header_bar"
+         >
+
+        <!-- <ImageView
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_alignParentLeft="true"
+            android:background="@drawable/back_button"
+            android:contentDescription="@string/btn_backImage" /> -->
+
+        <TextView
+            android:id="@+id/tv_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_centerVertical="true"
+            android:text="@string/btn_settingsLabel"
+            android:textColor="#fff"
+            android:textSize="20sp"
+            android:drawableLeft="@drawable/back_icon2"
+	        android:drawablePadding="2dp"
+	        android:contentDescription="@string/btn_settingsLabel"
+            />
+
+        <ImageView
+            android:id="@+id/btn_editSettings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_margin="10dp"
+            android:background="@drawable/header_edit_icon"
+            android:contentDescription="@string/btn_editSettingsImage" />
+
+        <ImageView
+            android:id="@+id/btn_saveSettings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_margin="10dp"
+            android:background="@drawable/donebutton"
+            android:contentDescription="@string/btn_saveSettingsImage" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:orientation="vertical"
+        android:layout_gravity="center" >
+	    
+	    <TextView android:id="@+id/tv_profPic"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="10dp"
+	        android:gravity="center"
+	        android:background="@drawable/prof_pic_img"
+	        android:text="@string/tvProfilePhotoText"
+	        android:textColor="#333333"
+	        android:textSize="16sp"
+	        android:width="0dip"
+	         />
+	    
+        <EditText android:id="@+id/et_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingLeft="10dp"
+            android:paddingBottom="5dp"
+	        android:layout_marginTop="15dp"
+	        android:textColor="#333333"
+	        android:textSize="18sp"
+            android:background="@drawable/gray_field_img_settings"
+            android:hint="@string/et_name" />
+	    
+        <EditText android:id="@+id/et_email"
+            android:layout_width="wrap_content"
+            android:maxWidth="322dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingBottom="5dp"
+	        android:layout_marginTop="22dp"
+	        android:textColor="#333333"
+	        android:textSize="18sp"
+            android:background="@drawable/gray_field_img_settings"
+            android:inputType="textEmailAddress"
+            android:singleLine="true"
+            android:hint="@string/et_email" />
+	    
+        <EditText android:id="@+id/et_phone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+	        android:layout_marginTop="24dp"
+	        android:paddingLeft="10dp"
+            android:paddingBottom="5dp"
+	        android:textColor="#333333"
+	        android:textSize="18sp"
+            android:background="@drawable/gray_field_img_settings"
+            android:inputType="phone"
+            android:hint="@string/et_phone" />
+	    
+        <EditText android:id="@+id/et_oldPassword"
+            android:layout_width="wrap_content"
+            android:maxWidth="322dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingBottom="5dp"
+	        android:layout_marginTop="24dp"
+	        android:textColor="#333333"
+	        android:textSize="18sp"
+            android:background="@drawable/gray_field_img_settings"
+            android:inputType="textPassword"
+            android:singleLine="true"
+            android:hint="@string/et_oldPassword" />
+
+        <EditText android:id="@+id/et_newPassword"
+            android:layout_width="wrap_content"
+            android:maxWidth="322dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingBottom="5dp"
+	        android:layout_marginTop="24dp"
+	        android:textColor="#333333"
+	        android:textSize="18sp"
+            android:background="@drawable/gray_field_img_settings"
+            android:inputType="textPassword"
+            android:singleLine="true"
+            android:hint="@string/et_newPassword" />
+        
+        <EditText android:id="@+id/et_confirmPassword"
+            android:layout_width="wrap_content"
+            android:maxWidth="322dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingBottom="5dp"
+	        android:layout_marginTop="24dp"
+	        android:textColor="#333333"
+	        android:textSize="18sp"
+            android:background="@drawable/gray_field_img_settings"
+            android:inputType="textPassword"
+            android:singleLine="true"
+            android:hint="@string/et_confirmPassword" />        	        	        	        
+    </LinearLayout>
+    
+    <RelativeLayout android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+	    <TextView android:id="@+id/tv_logout"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentBottom="true"
+	        android:paddingBottom="20dp"
+	        android:layout_centerHorizontal="true"
+	        android:text="@string/tv_logout"
+	        android:textSize="18sp"
+	        android:textColor="#ff2f33" />
+        
+    </RelativeLayout>
+
+</LinearLayout>

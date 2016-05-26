@@ -1,0 +1,108 @@
+<resources>
+
+    <!-- Service Related Strings -->
+    <string name="adminID">2</string>
+    <string name="URL">http://beta.sapplica.com/chitfund/services/</string>
+
+    <!-- New Chit Fund Screen -->
+    <string name="app_name">NewChitFund</string>
+
+    <!-- values used for chit creations screen START -->
+    <string name="create_new_chit">Create New Chit</string>
+    <string name="add_members">Add Members</string>
+    <string name="owner_month">Owner Month</string>
+    <string name="bid_date">Bid Date</string>
+    <string name="pay_date">Pay Date</string>
+    <string name="start_date">Start Date</string>
+    <string name="no_of_months">No of Months</string>
+    <string name="no_of_members">No of Members</string>
+    <string name="total_amount">Total Amount</string>
+    <string name="owner_name">Owner Name</string>
+    <string name="chit_name">Chit Name</string>
+    <string name="omnerMonth_prompt">Select Month</string>
+    <string name="add_owner">Add Owner</string>
+    <string-array name="omnerMonth_array">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
+        <string name="payBid_prompt">Select Date</string>
+    <string-array name="payBid_array">
+        <item>01</item>
+        <item>02</item>
+        <item>03</item>
+        <item>04</item>
+        <item>05</item>
+        <item>06</item>
+        <item>07</item>
+        <item>08</item>
+        <item>09</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <item>18</item>
+        <item>19</item>
+        <item>20</item>
+        <item>21</item>
+        <item>22</item>
+        <item>23</item>
+        <item>24</item>
+        <item>25</item>
+        <item>26</item>
+        <item>27</item>
+        <item>28</item>
+    </string-array>
+    
+    <!-- values used for chit creations screen END -->
+
+
+    <!-- Add Member Screen -->
+    <string name="add_member">Add Member</string>
+    <string name="full_name">Full Name</string>
+    <string name="mobile">Mobile</string>
+    <string name="search_member_name">Search Member Name</string>
+    
+    
+    <!-- Sign Up Screen START -->
+
+    <string name="iv_backIcon">Back Icon</string>
+    <string name="tv_signUp">Sign Up</string>
+    <string name="iv_signUpLine">Sign Up Line</string>
+    <string name="iv_separator">Separator</string>
+    <string name="iv_picCircle">Profile Picture Circle</string>
+    <string name="et_name">Name</string>
+    <string name="et_email">Email Address</string>
+    <string name="et_phone">Phone Number</string>
+    <string name="et_password">Password</string>
+
+    <!-- Sign Up Screen END -->
+
+
+    <!-- Login Screen START -->
+    <string name="iv_logo">Logo</string>
+    <string name="ev_mUsername">Username</string>
+    <string name="ev_mPassword">Password</string>
+    <string name="btn_forgotPassword">Forgot Password?</string>
+    <string name="tv_notMember">Not a Member?</string>
+    <string name="tv_loginSignUp">Sign up now</string>
+    <!-- Login Screen END -->
+
+
+    <!-- View Chit Details Screen Strings -->
+    <string name="chit_details">Chit Details</string>
+    
+</resources>

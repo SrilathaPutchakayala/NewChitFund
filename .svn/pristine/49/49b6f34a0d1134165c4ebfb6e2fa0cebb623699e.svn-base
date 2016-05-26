@@ -1,0 +1,78 @@
+<resources>
+
+    <!-- Common dimensions for all screens -->
+    <dimen name="action_bar_title_size">20sp</dimen>
+    <dimen name="pop_up_title_size">18sp</dimen>
+
+    <!-- Dimensions of Sign up screen -->
+    <dimen name="tv_backIcon">20sp</dimen>
+    <dimen name="tv_picCircle">16sp</dimen>
+    <dimen name="et_name">18sp</dimen>
+    <dimen name="et_email">18sp</dimen>
+    <dimen name="et_phone">18sp</dimen>
+    <dimen name="et_password">18sp</dimen>
+    <dimen name="et_confirmPassword">18sp</dimen>
+    
+    <!-- Dimensions of Login screen -->
+    <dimen name="et_mUsername">15sp</dimen>
+    <dimen name="et_mPassword">16sp</dimen>
+    <dimen name="tv_forgotPassword">15sp</dimen>
+    <dimen name="tv_notMember">15sp</dimen>
+    <dimen name="tv_signUp">15sp</dimen>
+    
+    <!-- View Chits Screen dimensions -->
+    <dimen name="view_chits_chit_name_size">19sp</dimen>
+    <dimen name="view_chits_amount_size">19sp</dimen>
+    <dimen name="view_chits_date_size">14sp</dimen>
+
+    <!-- Chits Details Screen dimensions -->
+    <dimen name="table_row_margin_top">1dp</dimen>
+    <dimen name="table_row_margin_right">1dp</dimen>
+    <dimen name="table_first_col_width">125dp</dimen>
+    <dimen name="table_cell_height">40dp</dimen>
+    <dimen name="table_cell_padding">6dp</dimen>
+    <dimen name="table_cell_text_size">16sp</dimen>
+
+    <!-- Bidding List Screen dimensions -->
+    <dimen name="bidding_list_member_name_width">180dp</dimen>
+    <dimen name="bidding_list_member_name_size">18sp</dimen>
+    <dimen name="bidding_list_member_name_small_size">13sp</dimen>
+    <dimen name="bidding_list_bid_date_size">13sp</dimen>
+    <dimen name="bidding_list_amount_size">17sp</dimen>
+    <dimen name="bidding_list_amount_small_size">13sp</dimen>
+
+    <!-- Members List Screen dimensions -->
+    <dimen name="members_list_member_name_width">150dp</dimen>
+    <dimen name="members_list_member_name_size">18sp</dimen>
+    <dimen name="members_list_member_name_small_size">13sp</dimen>
+    <dimen name="members_list_bid_date_width">180dp</dimen>
+    <dimen name="members_list_bid_date_size">13dp</dimen>
+    <dimen name="members_list_amount_size">17sp</dimen>
+    <dimen name="members_list_amount_small_size">13sp</dimen>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <!-- Chit Creation Screen dimensions -->
+    <dimen name="chitsCreationLabels">18sp</dimen>
+    <dimen name="chitsCreationHeadding">20sp</dimen>
+    <dimen name="chitsCancelMargin">9dp</dimen>
+    
+    
+     <!-- Add member Screen dimensions -->
+    <dimen name="addMemberaddMemberhead">20sp</dimen>
+    <dimen name="addMemberLabels">18sp</dimen>
+    <dimen name="addMemberEditText">16sp</dimen>
+    <dimen name="addMemberNameList">17sp</dimen>
+    <dimen name="addMemberMobileList">13.5sp</dimen>
+    <dimen name="addMemberAZIndex">15sp</dimen>
+     <dimen name="addMemberSearchName">16sp</dimen>
+    
+     <!--Payment Screen dimensions -->
+      <dimen name="paymentHeader">20sp</dimen>
+      <dimen name="paymentMonth">16sp</dimen>
+      <dimen name="paymentListText">18sp</dimen>
+     
+
+</resources>

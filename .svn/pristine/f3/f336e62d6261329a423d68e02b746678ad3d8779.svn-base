@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f3f3f3"
+    tools:context="com.example.uixment.MainActivity$PlaceholderFragment" >
+
+    <RelativeLayout
+        android:id="@+id/rl_paymentuser"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/top_header_bar" >
+
+        <ImageView
+            android:id="@+id/iv_paymentuserBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_margin="10dp"
+            android:background="@drawable/back_button" />
+
+        <TextView
+            android:id="@+id/tv_paymentheading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="15dp"
+            android:text="@string/payment_header"
+            android:textColor="@color/White"
+            android:textSize="20sp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/rl_paymentuser" >
+
+        <ListView
+            android:id="@+id/li_paymentuserlist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+        </ListView>
+
+        <TextView
+            android:id="@+id/tv_errormsg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:text="errormsg"
+            android:textColorHighlight="@color/Red"
+            android:textSize="20sp"
+            android:visibility="invisible" />
+    </RelativeLayout>
+
+</RelativeLayout>

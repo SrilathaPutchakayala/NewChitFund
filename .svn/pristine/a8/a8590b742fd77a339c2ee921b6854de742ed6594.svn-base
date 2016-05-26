@@ -1,0 +1,112 @@
+package com.newchitfund.androidclient;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+
+public class Menu extends Activity {
+	
+	private Button btnCreateChit;
+	private Button btnViewChits;
+	private Button btnAddMember;
+	private Button btnApproveDisapproveMember;
+	private Button btnChangePaymentStatus;
+	private Button btnSettings;
+	
+	protected void onCreate(Bundle savedInstanceState) {
+		setContentView(R.layout.menu);
+		super.onCreate(savedInstanceState);
+		
+		// Get objects from template
+		btnCreateChit = (Button) findViewById(R.id.btn_createChit);
+		btnViewChits = (Button) findViewById(R.id.btn_viewChits);
+		btnAddMember = (Button) findViewById(R.id.btn_addMember);
+		btnApproveDisapproveMember = (Button) findViewById(R.id.btn_approveDisapproveMember);
+		btnChangePaymentStatus = (Button) findViewById(R.id.btn_changePaymentStatus);
+		btnSettings = (Button) findViewById(R.id.btn_settings);
+		
+		btnCreateChit.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+				// Navigate to Create New Chit screen
+				Intent chitsCreation = new Intent(Menu.this, ChitsCreation.class);
+				startActivity(chitsCreation);
+				finish();
+			}
+		});
+		
+		btnViewChits.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+				// Navigate to View Chits Created screen
+				Intent viewChits = new Intent(Menu.this, ViewChits.class);
+				startActivity(viewChits);
+				finish();
+			}
+		});
+		
+		btnAddMember.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+				// Navigate to Add Member screen
+				Intent addMember = new Intent(Menu.this, AddMember.class);
+				startActivity(addMember);
+				finish();
+			}
+		});
+		
+		/*btnApproveDisapproveMember.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+				// Navigate to Approve/Disapprove Member screen
+				Intent appMeber = new Intent(Menu.this, AppMeber.class);
+				startActivity(appMeber);
+				finish();
+			}
+		});*/
+		
+		btnChangePaymentStatus.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+				// Navigate to Change Payment Status screen
+				Intent payment = new Intent(Menu.this, Payment.class);
+				startActivity(payment);
+				finish();
+			}
+		});
+		
+		/*btnSettings.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+				// Navigate to Settings screen
+				Intent settings = new Intent(Menu.this, Settings.class);
+				startActivity(settings);
+				finish();
+			}
+		});*/
+		
+		
+	}
+
+}

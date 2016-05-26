@@ -1,0 +1,951 @@
+/*************************************************************** 
+
+Project Name : NewChitFund
+
+ **************************************************************** 
+
+Class Name : ChitsCreation
+
+ Date : 27/05/2014
+
+ Developer : Veera manikanta reddy. G
+
+ Description : this class will handle chits creation 
+
+
+
+ **************************************************************** 
+
+Change History : 
+
+Date : 
+
+Developer : 
+
+Change : 
+
+ ****************************************************************/
+package com.newchitfund.androidclient;
+
+
+
+
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Calendar;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.newchitfund.businessobjects.Member;
+
+import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.graphics.Typeface;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.LinearLayout.LayoutParams;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class ChitsCreation extends Activity{
+
+	/* this is for date dialog ---- start */
+	
+	static final int DATE_DIALOG_ID = 0;
+	// variables to save user selected date and time
+	public int year = 0, month= 0, day, hour, minute;
+	private int mYear, mMonth, mDay;
+	
+	//default constructor
+	public ChitsCreation() {
+		// Assign current Date and Time Values to Variables
+		final Calendar c = Calendar.getInstance();
+		mYear = c.get(Calendar.YEAR);
+		mMonth = c.get(Calendar.MONTH);
+		mDay = c.get(Calendar.DAY_OF_MONTH);
+
+	}
+
+	// Register DatePickerDialog listener
+	private DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDateSetListener() {
+		// the callback received when the user "sets" the Date in the
+		// DatePickerDialog
+		public void onDateSet(DatePicker view, int yearSelected,int monthOfYear, int dayOfMonth) {
+			year = yearSelected;
+			month = monthOfYear;
+			day = dayOfMonth;
+			// Set the Selected Date in Select date Button
+			tv_ChitStartDate.setText(year+ "-" + (month+1) + "-"+ day);
+			int noOfMons = Integer.parseInt(et_ChitMonths.getText().toString().trim());
+			int tempMonth = month;
+			int tempYear = year;
+			monthSpinnerList.clear();
+			for(int i=0; i<noOfMons;i++){
+				if(tempMonth >= 12){
+					tempMonth = 0;
+					tempYear++;
+				}
+				   String monthName = getMonthName(tempMonth);
+					monthSpinnerList.add(monthName +" "+ tempYear);
+					tempMonth++;
+			}
+			
+			monthSpinnerAdapter.notifyDataSetChanged();
+		}
+
+		private String getMonthName(int tempMonth) {
+			String retVal = null;
+			switch(tempMonth){
+				case 0:
+					retVal = "January";
+					break;
+				case 1:
+					retVal = "February";
+					break;
+				case 2:
+					retVal = "March";
+					break;
+				case 3:
+					retVal = "April";
+					break;
+				case 4:
+					retVal = "May";
+					break;
+				case 5:
+					retVal = "June";
+					break;
+				case 6:
+					retVal = "July";
+					break;
+				case 7:
+					retVal = "August";
+					break;
+				case 8:
+					retVal = "September";
+					break;
+				case 9:
+					retVal = "October";
+					break;
+				case 10:
+					retVal = "November";
+					break;
+				case 11:
+					retVal = "December";
+					break;
+			}
+			
+			return retVal;
+		}
+	};
+
+	// Method automatically gets Called when you call showDialog() method
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		switch (id) {
+		case DATE_DIALOG_ID:
+			// create a new DatePickerDialog with values you want to show
+			return new DatePickerDialog(this, mDateSetListener, mYear, mMonth,mDay);
+		}
+		return null;
+	}
+	
+	/* this is for date dialog ---- end */
+	
+	/* Variables declaration start*/
+	int totalMembers;
+	int fromFlag = 0;
+	String chitName= null;
+	String chitAmount= null;
+	String chitMonths= null;
+	String chittMembers = null;
+	String chitBidDay= null;
+	String chitPayDay= null;
+	String chitOwnerMonth= null;
+	String chitOwnerMonthFormated =null;
+	String ownwerId = null;
+	int global_position =0;
+	ArrayList<Member> member_data = new ArrayList<Member>();
+	ArrayList<Member> selected_member_data = new ArrayList<Member>();
+	ArrayList<String> monthSpinnerList = new ArrayList<String>();
+	ArrayAdapter<String> monthSpinnerAdapter;
+	AddMemberList_Adapter maddAdapter;
+	String selected_member_ids;
+	/* Variables declaration end*/
+	
+	/* view items declarations start*/
+	
+	Button btn_Back;
+	Button btn_Done;
+	Button btn_AddMember;
+	EditText et_ChitName;
+	EditText et_ChitAmount;
+	EditText et_ChitMembers;
+	EditText et_ChitMonths;
+	EditText et_ChitOwnerMonth;
+	Spinner spn_ChitPay;
+	Spinner spn_ChitBid;
+	Spinner spn_OwnerMonth;
+	TextView tv_ChitStartDate;
+	TextView tv_ChitOwner;
+	TextView tv_subTitle;
+	RelativeLayout rl_owner;
+	RelativeLayout rl_memberView1;
+	ScrollView sv_AddView;
+	ListView lv_memberList;
+	ListView lv_addMembersList;
+	
+	/* view items declarations end*/
+	
+	/* onCreate start*/
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.chitcreation);
+		
+		rl_owner = (RelativeLayout)findViewById(R.id.addOwnerLayout);
+		rl_memberView1 = (RelativeLayout)findViewById(R.id.addMeamberView);
+		sv_AddView = (ScrollView)findViewById(R.id.mainChitAddView);
+		et_ChitName = (EditText)findViewById(R.id.chitName);
+		tv_ChitOwner = (TextView)findViewById(R.id.chitOwner);
+		et_ChitAmount = (EditText)findViewById(R.id.chitAmount);
+		et_ChitMembers = (EditText)findViewById(R.id.chitMembers);
+		et_ChitMonths = (EditText)findViewById(R.id.chitMonths);
+		tv_ChitStartDate = (TextView)findViewById(R.id.chitStart);
+		spn_ChitPay = (Spinner)findViewById(R.id.chitPaySpiner);
+		spn_ChitBid = (Spinner)findViewById(R.id.chitBidSpiner);
+		spn_OwnerMonth = (Spinner)findViewById(R.id.ownerMonthSpiner);
+		tv_subTitle = (TextView)findViewById(R.id.subScreenTitle);
+		lv_memberList = (ListView)findViewById(R.id.membersList);
+		lv_addMembersList = (ListView)findViewById(R.id.addmembersList);
+		/** Defining the ArrayAdapter to set items to Spinner Widget */
+		monthSpinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, monthSpinnerList);
+		spn_OwnerMonth.setAdapter(monthSpinnerAdapter);
+		monthSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		
+	}
+	/* onCreate end*/
+	
+	
+	/* method to show owner adding layout start*/
+	@SuppressWarnings("deprecation")
+	public void showOwnerLayout(View v)
+	{
+		sv_AddView.setVisibility(View.GONE);//hiding main chit creation scrollview
+		rl_owner.setBackgroundDrawable(getResources().getDrawable(R.drawable.add_own_back));//changing background
+		tv_subTitle.setText("Add Owner");//changing heading
+		rl_memberView1.setVisibility(View.GONE);//hiding adding member list
+		rl_owner.setVisibility(View.VISIBLE);//showing owner layout
+		lv_memberList.setVisibility(View.VISIBLE);//showing members list to add owner
+		fromFlag = 1;
+		new MemberList().execute();
+	}
+	/* method to show owner adding layout end*/
+	
+	/* method to show main layout start*/
+	public void showMainLayout(View v)
+	{
+		sv_AddView.setVisibility(View.VISIBLE);//showing main chit creation scrollview
+		rl_owner.setVisibility(View.GONE);//hiding owner layout
+	}
+	/* method to show main layout end*/
+	
+	/* method to show added member layout start*/
+	@SuppressWarnings("deprecation")
+	public void chitMembersAdd(View v)
+	{
+		totalMembers = 0;
+		totalMembers = Integer.parseInt(et_ChitMembers.getText().toString().trim());
+		totalMembers = totalMembers -1;
+		if(totalMembers > 0)
+		{
+			for(int i=0;i<totalMembers;i++)
+			{
+				selected_member_data.add(null);
+			}
+			fromFlag = 2;
+			//selected_member_data.clear();
+			maddAdapter = new AddMemberList_Adapter(ChitsCreation.this, R.layout.add_members_list);
+			lv_addMembersList.setAdapter(maddAdapter);
+			sv_AddView.setVisibility(View.GONE);//hiding main chit creation scrollview
+			lv_addMembersList.setVisibility(View.VISIBLE);
+			rl_owner.setBackgroundDrawable(getResources().getDrawable(R.drawable.add_mem_back));//changing background
+			tv_subTitle.setText("Add Members");//changing heading
+			rl_memberView1.setVisibility(View.VISIBLE);//showing adding member list
+			rl_owner.setVisibility(View.VISIBLE);//hiding owner layout
+			lv_memberList.setVisibility(View.GONE);//showing members list to add owner
+		}else
+		{
+			Toast.makeText(ChitsCreation.this, "Please specify no of members minimum 2", Toast.LENGTH_SHORT).show();
+		}
+		
+		//new MemberList().execute();
+	}
+	/* method to show added member layout end*/
+	
+	
+	
+	/* method to show date dialog start*/
+	@SuppressWarnings("deprecation")
+	public void showDateDialog(View v)
+	{
+		showDialog(DATE_DIALOG_ID); 
+	}
+	/* method to show date dialog end*/
+	
+	/* method for back button start */
+	public void backButtonMethod(View v)
+	{
+
+	}
+	/* method for back button end */
+	
+	/*method for done button start */
+	public void doneButtonMethod(View v)
+	{
+		chitName = et_ChitName.getText().toString().trim();
+		chitAmount = et_ChitAmount.getText().toString().trim();
+		chitMonths = et_ChitMonths.getText().toString().trim();
+		chittMembers = et_ChitMembers.getText().toString().trim();
+		chitPayDay = spn_ChitPay.getSelectedItem().toString();
+		chitBidDay = spn_ChitBid.getSelectedItem().toString();
+		if(spn_OwnerMonth.getSelectedItem() != null){
+			chitOwnerMonth = spn_OwnerMonth.getSelectedItem().toString();
+		}
+		if(chitName.length() <= 0){
+			Toast.makeText(ChitsCreation.this, "Please enter chit name", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if(ownwerId == null || ownwerId.length() <= 0 ){
+			Toast.makeText(ChitsCreation.this, "Please select chit owner", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if(chitAmount.length() <= 0){
+			Toast.makeText(ChitsCreation.this, "Please enter chit amount", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		int tempAmount = Integer.parseInt(chitAmount);
+		if(tempAmount <50000 || tempAmount > 5000000){
+			Toast.makeText(ChitsCreation.this, "Chit amount should be between 50,000 and 50,00,000", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		if(chittMembers.length() <= 0){
+			Toast.makeText(ChitsCreation.this, "Please enter chit total members", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		int intChitMembers = Integer.parseInt(chittMembers);
+
+		if(intChitMembers == 2 ){
+			Toast.makeText(ChitsCreation.this, "Chit total members cannot be lessthan 2", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if(chitMonths.length() <= 0){
+			Toast.makeText(ChitsCreation.this, "Please enter chit total months", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		int intChitMonths = Integer.parseInt(chitMonths);
+		if(intChitMonths == 0 ){
+			Toast.makeText(ChitsCreation.this, "Chit total months cannot be less than 2", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if(intChitMonths != intChitMembers){
+			Toast.makeText(ChitsCreation.this, "chit total months and members should be equal", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if(month == 0 || year == 0){
+			Toast.makeText(ChitsCreation.this, "Please select chit start date", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if(chitBidDay.length() <= 0){
+			Toast.makeText(ChitsCreation.this, "Please select chit bid day", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if(chitPayDay.length() <= 0){
+			Toast.makeText(ChitsCreation.this, "Please select chit pay day", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		int tempPayDay =Integer.parseInt(chitPayDay);
+		int tempBidDay =Integer.parseInt(chitBidDay);
+		if(tempPayDay < tempBidDay){
+			Toast.makeText(ChitsCreation.this, "Chit pay day should be after the bid day", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if(chitOwnerMonth.length() <= 0 || chitOwnerMonth == null){
+			Toast.makeText(ChitsCreation.this, "Please select chit owner month", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		String[] tempOwnerMonth = chitOwnerMonth.split(" ");
+		String monthName = getMonthName(tempOwnerMonth[0]);
+		chitOwnerMonthFormated = tempOwnerMonth[1] + "-" + monthName;
+		Member men;
+		selected_member_ids = null;
+		Boolean allChekFlag = true;
+		for(int i=0;i<intChitMembers;i++){
+			if(!selected_member_data.isEmpty()){
+				men = selected_member_data.get(i);
+				if(men!= null){
+					if(selected_member_ids == null){
+						selected_member_ids = men.get_userID();
+					}else{
+						selected_member_ids += "," + men.get_userID();
+					}
+				}else{
+					allChekFlag = false;
+				}
+			}
+		}
+		if(!allChekFlag && selected_member_ids != null){
+			Toast.makeText(ChitsCreation.this, "Please select all chit members", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		new AddChitAsynTask().execute();
+		
+	}
+	/*method for done button end */
+	
+	/* method to return months names start*/
+	private String getMonthName(String abc) {
+		String retval = null;
+		
+		switch(abc){
+			
+			case "January":
+				retval = "01";
+				break;
+			case "February":
+				retval = "02";
+				break;
+			case "March":
+				retval = "03";
+				break;
+			case "April":
+				retval = "04";
+				break;
+			case "May":
+				retval = "05";
+				break;
+			case "June":
+				retval = "06";
+				break;
+			case "July":
+				retval = "07";
+				break;
+			case "August":
+				retval = "08";
+				break;
+			case "September":
+				retval = "09";
+				break;
+			case "October":
+				retval = "10";
+				break;
+			case "November":
+				retval = "11";
+				break;
+			case "December":
+				retval = "12";
+				break;
+	}
+		return retval;
+	}
+	/* method to return months names end*/
+	/*************************************************************** 
+
+	Project Name : NewChitFund
+
+	 **************************************************************** 
+
+	Class Name : MemberList
+
+	 Date : 28/05/2014
+
+	 Developer : Veera manikanta reddy. G
+
+	 Description : To get data from service in background and show them in listview
+
+
+	 **************************************************************** 
+
+	Change History : 
+
+	Date : 
+
+	Developer : 
+
+	Change : 
+
+	 ****************************************************************//**/
+	
+	class MemberList extends AsyncTask<Void, Void, Void> {
+		private String Error = null;
+		ProgressDialog pd;
+		String res;
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pd = new ProgressDialog(ChitsCreation.this);
+			pd.setMessage("Loading member, Please wait..");
+			pd.show();
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			try {
+				String URL = getResources().getString(R.string.URL);
+				String adminID = getResources().getString(R.string.adminID);
+
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(URL);
+				MultipartEntity multiEntity = new MultipartEntity();
+				multiEntity.addPart("call", new StringBody("getAllMembers"));
+				multiEntity.addPart("adminID", new StringBody(adminID));
+				post.setEntity(multiEntity);
+
+				HttpResponse response = client.execute(post);
+				res = EntityUtils.toString(response.getEntity());
+
+				Log.v("responce", "Response===" + res.toString());
+
+			} catch (Exception e) {
+				Error = e.getMessage();
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			if (pd.isShowing()) {
+				if (Error != null) {
+
+				} else {
+					try {
+						member_data.clear();
+						JSONObject json = new JSONObject(res);
+						JSONArray jsonArray = json.getJSONArray("Result");
+						for (int i = 0; i < jsonArray.length(); i++) {
+							JSONObject resultObj = jsonArray.getJSONObject(i);
+							Member member = new Member();
+
+							member.set_name(resultObj.getString("name"));
+							member.set_phone(resultObj.getString("phone"));
+							member.set_userID(resultObj.getString("userID"));
+
+							member_data.add(member);
+						}
+					} catch (Exception e) {
+						Error = e.getMessage();
+						e.printStackTrace();
+					}
+
+					MemberList_Adapter mAdapter = new MemberList_Adapter(ChitsCreation.this, R.layout.memberrow, member_data);
+					lv_memberList.setAdapter(mAdapter);
+					lv_memberList.setOnItemClickListener(new OnItemClickListener(){
+			           
+						@Override
+						public void onItemClick(AdapterView<?> arg0, View arg1,int arg2, long arg3) {
+							Member emp = (Member) lv_memberList.getItemAtPosition(arg2);
+							if(fromFlag == 2){
+								selected_member_data.set(global_position,emp);
+								lv_memberList.setVisibility(View.GONE);
+								rl_memberView1.setVisibility(View.VISIBLE);
+								maddAdapter.notifyDataSetChanged();
+							}
+							else if(fromFlag == 1){
+								ownwerId = emp.get_userID();
+								tv_ChitOwner.setText(emp.get_name());
+								sv_AddView.setVisibility(View.VISIBLE);
+								rl_owner.setVisibility(View.GONE);
+							}
+							
+						}
+			        });
+					mAdapter.notifyDataSetChanged();
+
+				}
+				pd.dismiss();
+			}
+			super.onPostExecute(result);
+		}
+	}
+	/* members list class end */
+	
+	
+	/*************************************************************** 
+
+	Project Name : NewChitFund
+
+	 **************************************************************** 
+
+	Class Name : MemberList_Adapter
+
+	 Date : 28/05/2014
+
+	 Developer : Veera manikanta reddy. G
+
+	 Description : to show members in the list
+
+
+	 **************************************************************** 
+
+	Change History : 
+
+	Date : 
+
+	Developer : 
+
+	Change : 
+
+	 ****************************************************************//**/
+	public class MemberList_Adapter extends ArrayAdapter<Member> {
+		Activity activity;
+		int layoutResourceId;
+		Member member;
+		String Last_item = "-";
+		ArrayList<Member> data = new ArrayList<Member>();
+		View row;
+
+		public MemberList_Adapter(Activity act, int layoutResourceId,ArrayList<Member> data) {
+			super(act, layoutResourceId, data);
+			this.layoutResourceId = layoutResourceId;
+			this.activity = act;
+			this.data = data;
+			notifyDataSetChanged();
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			LayoutInflater inflater = getLayoutInflater();
+			row = inflater.inflate(R.layout.memberrow, parent, false);
+
+			LinearLayout L1_memberrow = (LinearLayout) row
+					.findViewById(R.id.memberrow);
+			TextView header = new TextView(getApplicationContext());
+
+			LinearLayout ll_datalayout = new LinearLayout(ChitsCreation.this);
+			ll_datalayout.setOrientation(LinearLayout.VERTICAL);
+			ll_datalayout.setBackgroundDrawable(getResources().getDrawable(R.drawable.listview_back_white_img));
+			LayoutParams datalayoutParam = new LayoutParams(
+					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+			ll_datalayout.setPadding(0, 17, 0, 0);
+
+			TextView memberName = new TextView(getApplicationContext());
+			memberName.setPadding(25, 0, 0, 0);
+			memberName.setGravity(Gravity.CENTER_VERTICAL);
+			memberName.setTextSize(15);
+			memberName.setTextColor(getResources().getColor(
+					R.color.listheader));
+			memberName.setTypeface(Typeface.createFromAsset(getAssets(),
+					"fonts/Roboto-Light.ttf"));
+			TextView memberPhone = new TextView(getApplicationContext());
+			memberPhone.setPadding(25, 0, 0, 0);
+			memberPhone.setGravity(Gravity.CENTER_VERTICAL);
+			memberPhone.setTextColor(getResources().getColor(
+					R.color.listheader));
+			memberPhone.setTextSize(10);
+			memberPhone.setTypeface(Typeface.createFromAsset(getAssets(),
+					"fonts/Roboto-Light.ttf"));
+
+			// System.out.println("LAST : " + last_item);
+
+			String label1 = data.get(position).get_name();
+			char firstChar = label1.toUpperCase().charAt(0);
+
+			if (position == 0) {
+				setSection(L1_memberrow, label1);
+			} else {
+				String preLabel = data.get(position - 1).get_name();
+				char preFirstChar = preLabel.toUpperCase().charAt(0);
+				if (firstChar != preFirstChar) {
+					setSection(L1_memberrow, label1);
+				} else {
+					header.setVisibility(View.GONE);
+				}
+			}
+
+			memberName.setText(data.get(position).get_name());
+			memberPhone.setText(data.get(position).get_phone());
+
+			ll_datalayout.addView(memberName);
+			ll_datalayout.addView(memberPhone);
+			L1_memberrow.addView(ll_datalayout, datalayoutParam);
+			return row;
+
+		}
+
+	}
+
+
+	private void setSection(LinearLayout llmemberrow, String label) {
+		TextView tv_header = new TextView(getBaseContext());
+		// header.setBackgroundColor(0xffaabbcc);
+		tv_header.setTextColor(getResources().getColor(R.color.listheader));
+		tv_header.setText(label.substring(0, 1).toUpperCase());
+		tv_header.setTextSize(25);
+		tv_header.setPadding(15, 0, 0, 0);
+		tv_header.setGravity(Gravity.CENTER_VERTICAL);
+		tv_header.setBackgroundColor(getResources().getColor(
+				R.color.listheaderbg));
+		llmemberrow.addView(tv_header);
+	}
+	
+
+	/*************************************************************** 
+
+	Project Name : NewChitFund
+
+	 **************************************************************** 
+
+	Class Name : AddMemberList_Adapter
+
+	 Date : 28/05/2014
+
+	 Developer : Veera manikanta reddy. G
+
+	 Description : adapter to add textviews dynamically to the list to add members
+
+
+	 **************************************************************** 
+
+	Change History : 
+
+	Date : 
+
+	Developer : 
+
+	Change : 
+
+	 ****************************************************************//**/
+	
+		public class AddMemberList_Adapter extends BaseAdapter {
+			Activity activity;
+			int layoutResourceId;
+			Member member;
+			
+			public AddMemberList_Adapter(Activity act, int layoutResourceId) {
+				
+				this.layoutResourceId = layoutResourceId;
+				this.activity = act;
+				notifyDataSetChanged();
+			}
+
+			@Override
+			public View getView(final int position, View convertView, ViewGroup parent) {
+				View row = convertView;
+				MemberHolderList holder = null;
+
+				if (row == null) {
+					LayoutInflater inflater = LayoutInflater.from(activity);
+					row = inflater.inflate(layoutResourceId, parent, false);
+
+					holder = new MemberHolderList();
+					holder.tv_member_name = (TextView) row.findViewById(R.id.memberName);
+					holder.btn_addmember = (Button) row.findViewById(R.id.addButton);
+					
+					row.setTag(holder);
+				} else {
+					holder = (MemberHolderList) row.getTag();
+				}
+			
+				member = selected_member_data.get(position);
+				if(member != null)
+				{
+					holder.tv_member_name.setText(member.get_name());
+				}
+			
+			holder.btn_addmember.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					global_position = position;
+					sv_AddView.setVisibility(View.GONE);
+			    	rl_memberView1.setVisibility(View.GONE);
+			    	lv_memberList.setVisibility(View.VISIBLE);
+					new MemberList().execute();
+				}
+			});
+				return row;
+
+			}
+
+			class MemberHolderList {
+				TextView tv_member_name;
+				Button btn_addmember;
+			}
+
+			@Override
+			public int getCount() {
+				return totalMembers;
+			}
+
+			@Override
+			public Object getItem(int arg0) {
+				return null;
+			}
+
+			@Override
+			public long getItemId(int arg0) {
+				return 0;
+			}
+
+		}
+		/* class to handle add members listview adapter end*/
+		
+		
+		/*************************************************************** 
+
+		Project Name : NewChitFund
+
+		 **************************************************************** 
+
+		Class Name : AddChitAsynTask
+
+		 Date : 29/05/2014
+
+		 Developer : Veera manikanta reddy. G
+
+		 Description : saving the new chit data to server
+
+
+		 **************************************************************** 
+
+		Change History : 
+
+		Date : 
+
+		Developer : 
+
+		Change : 
+
+		 ****************************************************************//**//**
+		* Class Name : AddMemberAsynTask Purpose : Class to add member on
+		* background
+		*/
+		class AddChitAsynTask extends AsyncTask<Void, Void, String> {
+		ProgressDialog pd;
+
+		String mStatus, mMessage;
+
+		@Override
+		protected void onPreExecute() {
+		pd = new ProgressDialog(ChitsCreation.this);
+		pd.setIndeterminate(true);
+		pd.setMessage("Adding chit...");
+		pd.setCancelable(false);
+		pd.show();
+		super.onPreExecute();
+		}
+
+		@Override
+		protected String doInBackground(Void... params) {
+
+		try {
+
+		String URL = getResources().getString(R.string.URL);
+		String adminID = getResources().getString(R.string.adminID);
+
+		HttpClient client = new DefaultHttpClient();
+		HttpPost post = new HttpPost(URL);
+		MultipartEntity multiEntity = new MultipartEntity();
+
+		multiEntity.addPart("call", new StringBody("createChit"));
+		multiEntity.addPart("name", new StringBody(chitName));
+		multiEntity.addPart("ownerID", new StringBody(ownwerId));
+		multiEntity.addPart("amount", new StringBody(chitAmount));
+		multiEntity.addPart("noOfMembers", new StringBody(chittMembers));
+		multiEntity.addPart("noOfMonths", new StringBody(chitMonths));
+		multiEntity.addPart("bidDate", new StringBody(chitBidDay));
+		multiEntity.addPart("paymentDate", new StringBody(chitPayDay));
+		multiEntity.addPart("startingMonth", new StringBody(tv_ChitStartDate.getText().toString()));
+		multiEntity.addPart("adminID", new StringBody(adminID));
+		multiEntity.addPart("ownerMonth", new StringBody(chitOwnerMonthFormated));
+		if(selected_member_ids != null){
+			multiEntity.addPart("memberIDs", new StringBody(selected_member_ids));
+		}
+		
+		post.setEntity(multiEntity);
+		HttpResponse response = client.execute(post);
+		String res = EntityUtils.toString(response.getEntity());
+
+		Log.v("responce", "Response===" + res);
+		JSONObject json1 = new JSONObject(res);
+
+		mStatus = json1.getString("Status");
+		mMessage = json1.getString("Message");
+
+		if (mStatus.equalsIgnoreCase("Success")) {
+			return "success";
+		}
+		if (!mMessage.equalsIgnoreCase("OK")) {
+			return mMessage;
+		}
+
+		} catch (UnsupportedEncodingException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+		} catch (ClientProtocolException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+		} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+		} catch (JSONException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+		}
+		return null;
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+		if (pd.isShowing()) {
+		if (result.equalsIgnoreCase("success")) {
+
+		Toast.makeText(getApplicationContext(),"Chit added successfully", Toast.LENGTH_LONG).show();
+
+		} 
+		else {
+			Toast.makeText(getApplicationContext(), mMessage,Toast.LENGTH_LONG).show();
+		}
+		pd.dismiss();
+		}
+		super.onPostExecute(result);
+		}
+	}
+
+
+}
+

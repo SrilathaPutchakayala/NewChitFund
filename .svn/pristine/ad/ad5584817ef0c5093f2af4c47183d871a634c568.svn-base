@@ -1,0 +1,341 @@
+package com.newchitfund.androidclient;
+
+import java.util.ArrayList;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.newchitfund.businessobjects.Chit;
+import com.newchitfund.businessobjects.Paymentmodel;
+
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class UserPayment extends Activity {
+
+	ImageView ivPaymentUserBack;
+	TextView tvPaymentHeading;
+	ListView liPaymentUserList;
+	TextView tvErrorMsg;
+
+	ArrayList<Paymentmodel> payment_data = new ArrayList<Paymentmodel>();
+	Chit chitDetails = new Chit();
+	String chitId;
+	// To store userID shraredPreferences
+	String memberId;
+	
+
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.userpayment);
+
+		ivPaymentUserBack = (ImageView) findViewById(R.id.iv_paymentuserBack);
+		tvPaymentHeading = (TextView) findViewById(R.id.tv_paymentheading);
+		liPaymentUserList = (ListView) findViewById(R.id.li_paymentuserlist);
+		tvErrorMsg = (TextView) findViewById(R.id.tv_errormsg);
+
+		tvPaymentHeading.setTypeface(Typeface.createFromAsset(getAssets(),
+				"fonts/Roboto-Light.ttf"));
+		tvErrorMsg.setTypeface(Typeface.createFromAsset(getAssets(),
+				"fonts/Roboto-Light.ttf"));
+
+		Bundle bundle = getIntent().getExtras();
+		if (bundle != null) {
+			chitDetails = (Chit) bundle.getSerializable("chit");
+			chitId = chitDetails.get_chitID();
+
+		}
+		// from sharedpreferences
+		SharedPreferences sharedpreferences = getSharedPreferences(SessionStorage.ACCOUNT_PREFS_NAME, Context.MODE_PRIVATE);
+		memberId = sharedpreferences.getString("MEMBER_ID", null);		
+
+		/* An asynchronous task to get the user payment details */
+		new UserPaymentList(chitId, memberId).execute();
+
+		ivPaymentUserBack.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent viewchits = new Intent(UserPayment.this, ViewChits.class);
+				startActivity(viewchits);
+				finish();
+
+			}
+		});
+	}
+
+	@Override
+	public void onBackPressed() {
+		// TODO Auto-generated method stub
+		Intent viewchits = new Intent(UserPayment.this, ViewChits.class);
+		startActivity(viewchits);
+		finish();
+		super.onBackPressed();
+	}
+
+	/**
+	 * Class Name : UserPaymentList Purpose : To get data from service in
+	 * background and show them in listview
+	 */
+	class UserPaymentList extends AsyncTask<Void, Void, Void> {
+		private String Error = null;
+		ProgressDialog pd;
+		String res;
+		String chitId, memberId;
+		String mStatus, mMessage;
+
+		public UserPaymentList(String chitId, String memberId) {
+			// TODO Auto-generated constructor stub
+			this.chitId = chitId;
+			this.memberId = memberId;
+		}
+
+		@Override
+		protected void onPreExecute() {
+
+			pd = new ProgressDialog(UserPayment.this);
+			pd.setIndeterminate(true);
+			pd.setMessage("Loading payment details, Please wait...");
+			pd.setCancelable(false);
+			pd.show();
+			super.onPreExecute();
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			try {
+				String URL = getResources().getString(R.string.URL);
+				String adminID = getResources().getString(R.string.adminID);
+
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(URL);
+				MultipartEntity multiEntity = new MultipartEntity();
+
+				multiEntity.addPart("call", new StringBody(
+						"getPaymentMemberStatusList"));
+				multiEntity.addPart("adminID", new StringBody(adminID));
+				multiEntity.addPart("chitID", new StringBody(this.chitId));
+				multiEntity.addPart("memberID", new StringBody(this.memberId));
+				post.setEntity(multiEntity);
+
+				HttpResponse response = client.execute(post);
+				res = EntityUtils.toString(response.getEntity());
+
+				Log.v("responce", "Response===" + res.toString());
+				JSONObject json1 = new JSONObject(res);
+
+				mStatus = json1.getString("Status");
+				mMessage = json1.getString("Message");
+
+			} catch (Exception e) {
+				Error = e.getMessage();
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			if (pd.isShowing()) {
+				if (Error != null) {
+					Toast.makeText(getApplicationContext(), Error,
+							Toast.LENGTH_LONG).show();
+					Intent moveToViewChits = new Intent(UserPayment.this,
+							ViewChits.class);
+					startActivity(moveToViewChits);
+					finish();
+				} else if (mStatus.equalsIgnoreCase("Error")) {
+					tvErrorMsg.setText(mMessage);
+					tvErrorMsg.setVisibility(View.VISIBLE);
+					liPaymentUserList.setVisibility(View.INVISIBLE);
+				} else {
+					try {
+						tvErrorMsg.setVisibility(View.INVISIBLE);
+						liPaymentUserList.setVisibility(View.VISIBLE);
+						payment_data.clear();
+						JSONObject json = new JSONObject(res);
+						JSONArray jsonArray = json.getJSONArray("Result");
+						for (int i = 0; i < jsonArray.length(); i++) {
+							JSONObject resultObj = jsonArray.getJSONObject(i);
+							Paymentmodel payment = new Paymentmodel();
+
+							payment.set_paymentDate(resultObj
+									.getString("paymentDate"));
+							payment.set_amount(resultObj.getString("amount"));
+							payment.set_paymentStatus(resultObj
+									.getString("paymentStatus"));
+
+							payment_data.add(payment);
+						}
+					} catch (Exception e) {
+						// TODO: handle exception
+					}
+
+					PaymentUserList_Adapter mAdapter = new PaymentUserList_Adapter(
+							UserPayment.this, R.layout.paymentrow, payment_data);
+					liPaymentUserList.setAdapter(mAdapter);
+					mAdapter.notifyDataSetChanged();
+
+				}
+				pd.dismiss();
+			}
+			super.onPostExecute(result);
+		}
+	}
+
+	/**
+	 * Class Name : PaymentUserList_Adapter 
+	 * Purpose : To set data to list
+	 * adapter for each row
+	 */
+	public class PaymentUserList_Adapter extends ArrayAdapter<Paymentmodel> {
+		Activity activity;
+		int layoutResourceId;
+		Paymentmodel payment;
+		String monthYear;
+		ArrayList<Paymentmodel> data = new ArrayList<Paymentmodel>();
+
+		public PaymentUserList_Adapter(Activity act, int layoutResourceId,
+				ArrayList<Paymentmodel> data) {
+			super(act, layoutResourceId, data);
+			this.layoutResourceId = layoutResourceId;
+			this.activity = act;
+			this.data = data;
+			notifyDataSetChanged();
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View row = convertView;
+			PaymentHolder holder = null;
+
+			if (row == null) {
+				LayoutInflater inflater = LayoutInflater.from(activity);
+
+				row = inflater.inflate(layoutResourceId, parent, false);
+				holder = new PaymentHolder();
+				holder.tvPaymentMemberAndMonthName = (TextView) row
+						.findViewById(R.id.paymentmemberandmonthname);
+				holder.tvPaymentAmount = (TextView) row
+						.findViewById(R.id.payment_amount);
+				holder.btnPayButton = (ImageView) row
+						.findViewById(R.id.paybutton);
+				holder.btnPaidButton = (ImageView) row
+						.findViewById(R.id.paidbutton);
+				row.setTag(holder);
+
+			} else {
+				holder = (PaymentHolder) row.getTag();
+			}
+			payment = data.get(position);
+			monthYear = payment.get_paymentDate();
+			String[] DateSplit = monthYear.split("-");
+			String monthName = getMonthName(Integer.parseInt(DateSplit[1]));
+
+			holder.tvPaymentMemberAndMonthName.setText(monthName + " "
+					+ DateSplit[0]);
+			holder.tvPaymentAmount.setText(payment.get_amount());
+			View rowdivider = (View) row.findViewById(R.id.rowdivider);
+			if ((data.size() - 1) == position) {
+
+				rowdivider.setVisibility(View.GONE);
+			} else {
+				rowdivider.setVisibility(View.VISIBLE);
+			}
+
+			if (payment.get_paymentStatus().equalsIgnoreCase("PENDING")) {
+				holder.btnPayButton.setVisibility(View.VISIBLE);
+				holder.btnPayButton.setTag(payment.get_chitPaymentID());
+				holder.btnPaidButton.setVisibility(View.INVISIBLE);
+
+			} else if (payment.get_paymentStatus().equalsIgnoreCase("CLEARED")) {
+				holder.btnPayButton.setVisibility(View.INVISIBLE);
+				holder.btnPaidButton.setVisibility(View.VISIBLE);
+			}
+
+			return row;
+
+		}
+
+		class PaymentHolder {
+			ImageView btnPayButton;
+			ImageView btnPaidButton;
+			TextView tvPaymentMemberAndMonthName;
+			TextView tvPaymentAmount;
+		}
+
+	}
+
+	/* Method to get monthname by passing number as parameter */
+	private String getMonthName(int tempMonth) {
+		String retVal = null;
+		switch (tempMonth) {
+		case 1:
+			retVal = "January";
+			break;
+		case 2:
+			retVal = "February";
+			break;
+		case 3:
+			retVal = "March";
+			break;
+		case 4:
+			retVal = "April";
+			break;
+		case 5:
+			retVal = "May";
+			break;
+		case 6:
+			retVal = "June";
+			break;
+		case 7:
+			retVal = "July";
+			break;
+		case 8:
+			retVal = "August";
+			break;
+		case 9:
+			retVal = "September";
+			break;
+		case 10:
+			retVal = "October";
+			break;
+		case 11:
+			retVal = "November";
+			break;
+		case 12:
+			retVal = "December";
+			break;
+		}
+
+		return retVal;
+	}
+
+}

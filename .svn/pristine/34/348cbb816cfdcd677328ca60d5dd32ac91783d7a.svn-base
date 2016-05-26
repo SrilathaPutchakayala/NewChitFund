@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+     <color name="edittextcolor">#cccccc</color>
+     <color name = "headerbg">#505F63</color>
+     <color name = "listviewbg">#C0C0C0</color>
+</resources>

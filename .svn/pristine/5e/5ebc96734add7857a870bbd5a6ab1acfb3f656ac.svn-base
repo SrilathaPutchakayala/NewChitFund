@@ -1,0 +1,443 @@
+/***************************************************************
+ * 
+ * Project Name : Chitfund
+ * Class Name   : ViewChits
+ * DateTime     : 27-May-2014 09:30 AM 
+ * Developer    : Durga Prasad B
+ * Company      : Sagarsoft India Ltd.
+ * 
+ * Description  :
+ * ------------------------------------------------------------- 
+ * This class is used to display list of all chits. List will be
+ * differentiated by user role (ADMIN / USER).
+ * For admin he/she will get all the chits created by him/her.
+ * For user he/she will get all the chits assigned to him/her. 
+ * On clicking list item it will redirect to Chit Details.
+ * -------------------------------------------------------------
+ * 
+ * *************************************************************/
+
+package com.newchitfund.androidclient;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.newchitfund.businessobjects.Chit;
+
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class ViewChits extends Activity
+{
+	ListView chitsListView;
+
+	// Storing all chits details into chits_data array for later retrieval.
+	ArrayList<Chit> chits_data = new ArrayList<Chit>();
+
+	// To store userType,userID shraredPreferences
+	String userType,userID;
+
+	String inputStartDate,inputPayDate,inputBidDate,inputOwnerMonth;
+	String outPutStartDate,outPutPayDate,outPutBidDate,outputOwnerMonth;
+
+	private JSONObject jsonResponse;
+
+	//Typeface tf_Robo_Light = Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf");
+	//Typeface tf_Robo_Regular = Typeface.createFromAsset(getAssets(), "fonts/Roboto-Regular.ttf");
+	
+	//fromScreen Key is used to redirect to PayementScreen  changed by Rajesh
+	String fromScreen;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.view_chits);
+
+
+		Bundle bundle = getIntent().getExtras();
+		if(bundle!=null)
+		{
+			fromScreen = bundle.getString("FROMSCREEN");
+		}
+
+
+		TextView title = (TextView) findViewById(R.id.tv_view_chits_action_bar_title);
+		title.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf"));
+		
+		chitsListView = (ListView)findViewById(R.id.lv_allChitsList);
+
+		//Storing sharedPreferences values into userType,userID
+		SharedPreferences sharedpreferences = getSharedPreferences(SessionStorage.ACCOUNT_PREFS_NAME, Context.MODE_PRIVATE);
+		userType = sharedpreferences.getString("MEMBER_ROLE", null);
+		userID = sharedpreferences.getString("MEMBER_ID", null);
+
+
+		/* On clicking of each list item in ViewChits screen 
+		 * we are redirectiing to chit details screen with the chit object. 
+		 */
+		chitsListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> av, View v, int position,
+					long arg3) {
+				// TODO Auto-generated method stub
+
+				//Getting chit object from chits_data array using position
+				Chit chit = chits_data.get(position); 
+				if(fromScreen!=null)
+				{
+					if(fromScreen.equals("payment"))
+					{
+						//Redirecting to Payment Screen using chit object
+						Intent chitDetailsIntent = new Intent(ViewChits.this,Payment.class);
+						chitDetailsIntent.putExtra("chit", chit);
+						startActivity(chitDetailsIntent);
+						//finish();
+					}
+				}
+				else
+				{
+					//Redirecting to ChitDetails Screen using chit object
+					Intent chitDetailsIntent = new Intent(ViewChits.this,ChitDetails.class);
+					chitDetailsIntent.putExtra("chit", chit);
+					startActivity(chitDetailsIntent);
+					finish();
+				}
+			}
+		});
+
+		new GetAllChits().execute();		
+	}
+
+	/**
+	 * Method Name : onBackPressed 
+	 * Return Type : void
+	 * 
+	 * Description : This method is used to handle device back button.
+	 * When user clicks on device back button it redirect the screen
+	 * to ViewChits Screen.
+	 */
+	@Override
+	public void onBackPressed() {
+		// TODO Auto-generated method stub
+		super.onBackPressed();
+
+		Intent chitDetailsIntent = new Intent(this,Categories.class);
+		startActivity(chitDetailsIntent);
+		finish();
+	}
+
+	@Override
+	protected void onStart() {
+		// TODO Auto-generated method stub
+		super.onStart();
+	}
+
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+	}
+
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+	}
+
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+	}
+
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+	}
+
+	/**
+	 * Method Name : goBack 
+	 * @param v    : View Object
+	 * Return Type : void
+	 * 
+	 * Description : This method is used to redirect the screen
+	 * to Categories Screen.
+	 */
+	public void goBack(View v)
+	{
+		Intent chitDetailsIntent = new Intent(this,Categories.class);
+		startActivity(chitDetailsIntent);
+		finish();
+		//Toast.makeText(getApplicationContext(), "Back Clicked", Toast.LENGTH_SHORT).show();
+	}
+
+
+	/***************************************************************
+	 * 
+	 * Project Name : Chitfund
+	 * Class Name   : GetAllChits
+	 * DateTime     : 27-May-2014 05:00 PM 
+	 * Developer    : Durga Prasad B
+	 * Company      : Sagarsoft India Ltd.
+	 * 
+	 * Description  :
+	 * ------------------------------------------------------------- 
+	 * This class is used to get all chits from REST webservice by
+	 * extending AsyncTask.
+	 * 
+	 * Depends upon user role service url will be changed and the
+	 * list will fetch from webservice and display in listview. 
+	 * -------------------------------------------------------------
+	 * 
+	 * *************************************************************/
+
+	class GetAllChits extends AsyncTask<Void, Void, String>
+	{
+		private String Error = null;
+		ProgressDialog pd;
+		String res;
+		String sStatus=null, sMessage=null;
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pd = new ProgressDialog(ViewChits.this);
+			pd.setMessage("Loading chits details, Please wait..");
+			pd.setCancelable(false);
+			pd.show();
+		}
+
+		@Override
+		protected String doInBackground(Void... params) {
+			try {
+				String url;
+
+				//userType = "ADMIN";
+				//userID = "2";
+
+				if(userType.equalsIgnoreCase("ADMIN"))
+					url= getResources().getString(R.string.URL)+"?call=viewAllChits&adminID="+userID;
+				else
+					url= getResources().getString(R.string.URL)+"?call=viewUserChits&userID="+userID;
+
+				HttpClient client = new DefaultHttpClient();
+				HttpPost postAccept = new HttpPost(url);
+				HttpResponse response = client.execute(postAccept);
+				res = EntityUtils.toString(response.getEntity());
+				//Log.v("Response", res.toString());
+
+				jsonResponse = new JSONObject(res);
+
+				sStatus = jsonResponse.getString("Status");
+				sMessage = jsonResponse.getString("Message");
+
+				if(sStatus.equalsIgnoreCase("Success")) {
+					return "success";
+				}
+
+				if(!sMessage.equalsIgnoreCase("OK")) {
+					return sMessage;
+				}
+
+			}catch (Exception e) {
+				Error=e.getMessage();
+			}
+			return "Login Failed";
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+
+			if(pd.isShowing())
+			{
+				if(result.equalsIgnoreCase("success")) {
+
+					//Toast.makeText(getApplicationContext(), "Welcome", Toast.LENGTH_LONG).show();
+
+					try
+					{
+						chits_data.clear();
+						//JSONObject json = new JSONObject(res);
+						JSONArray jsonArray =jsonResponse.getJSONArray("Result");
+
+						//Log.v("Result Set:", jsonArray.toString());
+
+						for (int i = 0; i < jsonArray.length(); i++) {
+							JSONObject resultObj = jsonArray.getJSONObject(i);
+							Chit chit = new Chit();
+
+							chit.set_chitID(resultObj.getString("chitID"));
+							chit.set_chitName(resultObj.getString("chitName"));
+							chit.set_adminID(resultObj.getString("adminID"));
+							chit.set_ownerID(resultObj.getString("ownerID"));
+							chit.set_ownerName(resultObj.getString("owner"));
+							chit.set_chitAmount(resultObj.getString("amount"));
+							chit.set_noOfMembers(resultObj.getString("noOfMembers"));
+							chit.set_noOfMonths(resultObj.getString("noOfMonths"));
+
+							SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+							SimpleDateFormat inputFormat1 = new SimpleDateFormat("d/M/yyyy");
+							SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yy");
+							SimpleDateFormat outputFormat1 = new SimpleDateFormat("MMMM-yyyy");
+
+							inputStartDate= resultObj.getString("startingMonth");
+							outPutStartDate = resultObj.getString("startingMonth");
+
+							inputPayDate= resultObj.getString("payDate");
+							outPutPayDate = resultObj.getString("payDate");
+
+							inputBidDate= resultObj.getString("bidDate");
+							outPutBidDate = resultObj.getString("bidDate");
+
+							inputOwnerMonth= resultObj.getString("ownerMonth");
+							outputOwnerMonth = resultObj.getString("ownerMonth");
+
+							try {
+								Date date = inputFormat.parse(inputStartDate);
+								outPutStartDate = outputFormat.format(date);
+
+								Date date1 = inputFormat1.parse(inputPayDate);
+								outPutPayDate = outputFormat.format(date1);
+
+								Date date2 = inputFormat1.parse(inputBidDate);
+								outPutBidDate = outputFormat.format(date2);
+
+								Date date3 = inputFormat.parse(inputOwnerMonth+"-01");
+								outputOwnerMonth = outputFormat1.format(date3);
+
+							} catch (ParseException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
+
+
+							chit.set_startDate(outPutStartDate);
+							chit.set_bidDate(outPutBidDate);
+							chit.set_paymentDate(outPutPayDate);
+							chit.set_ownerMonth(outputOwnerMonth);
+							chit.set_createdOn(resultObj.getString("createdOn"));
+							//chit.set_modifiedOn(resultObj.getString("modifiedOn"));
+							//chit.set_status(resultObj.getString("status"));
+
+							chits_data.add(chit);
+						}
+					}catch (Exception e) {
+						// TODO: handle exception
+					}
+
+					Chits_Adapter cAdapter = new Chits_Adapter(ViewChits.this, R.layout.custom_chit,
+							chits_data);
+					chitsListView.setAdapter(cAdapter);
+					cAdapter.notifyDataSetChanged();
+
+					pd.dismiss();
+				}
+				else if(result.equalsIgnoreCase("Login Failed")) {
+					pd.dismiss();
+					Toast.makeText(getApplicationContext(), result, Toast.LENGTH_LONG).show();				
+				}
+				else {
+					pd.dismiss();
+					Toast.makeText(getApplicationContext(), result, Toast.LENGTH_LONG).show();				
+				}
+			}
+
+			super.onPostExecute(result);
+		}
+	}
+
+
+	public class Chits_Adapter extends ArrayAdapter<Chit> {
+		Activity activity;
+		int layoutResourceId;
+		Chit chit;
+		ArrayList<Chit> data = new ArrayList<Chit>();
+
+		public Chits_Adapter(Activity act, int layoutResourceId,
+				ArrayList<Chit> data) {
+			super(act, layoutResourceId, data);
+			this.layoutResourceId = layoutResourceId;
+			this.activity = act;
+			this.data = data;
+			//notifyDataSetChanged();
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View row = convertView;
+			ChitHolder holder = null;
+
+			if (row == null) {
+				LayoutInflater inflater = LayoutInflater.from(activity);
+				row = inflater.inflate(layoutResourceId, parent, false);
+
+				holder = new ChitHolder();
+				holder.tv_chitName = (TextView) row.findViewById(R.id.tv_chit_name);
+				holder.tv_chitName.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Regular.ttf"));
+				holder.tv_chitAmount = (TextView) row.findViewById(R.id.tv_chit_amount);
+				holder.tv_chitAmount.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf"));
+				holder.tv_startDate = (TextView) row.findViewById(R.id.tv_chit_start_date);
+				holder.tv_startDate.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf"));
+				holder.tv_bidDate = (TextView) row.findViewById(R.id.tv_chit_bid_date);
+				holder.tv_bidDate.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf"));
+				holder.tv_paymentDate = (TextView) row.findViewById(R.id.tv_chit_pay_date);
+				holder.tv_paymentDate.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf"));
+
+				row.setTag(holder);
+			} else {
+				holder = (ChitHolder) row.getTag();
+			}
+			chit = data.get(position);
+
+			holder.tv_chitName.setText(chit.get_chitName());
+			holder.tv_chitAmount.setText(getResources().getString(R.string.Rupee)+" "+chit.get_chitAmount());
+			holder.tv_startDate.setText(chit.get_startDate());
+			holder.tv_bidDate.setText(chit.get_bidDate());
+			holder.tv_paymentDate.setText(chit.get_paymentDate());
+
+			return row;
+
+		}
+
+		class ChitHolder {
+			TextView tv_chitName;
+			TextView tv_chitAmount;
+			TextView tv_startDate;
+			TextView tv_bidDate;
+			TextView tv_paymentDate;
+			LinearLayout ll_chitDetails;
+		}
+
+	}
+
+}

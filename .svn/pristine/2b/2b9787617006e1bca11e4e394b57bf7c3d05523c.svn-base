@@ -1,0 +1,556 @@
+/*************************************************************** 
+
+Project Name : ChitFund
+
+ **************************************************************** 
+
+Class Name : AddMember
+
+ Date : 27 May 2014
+
+ Developer : Deepthi
+
+ Description : To add a new member along with members search by name
+
+ 
+
+ **************************************************************** 
+
+Change History : 
+
+Date : 
+
+Developer : 
+
+Change : 
+
+ 
+
+ ****************************************************************/
+package com.newchitfund.androidclient;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
+import com.newchitfund.businessobjects.Member;
+
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.graphics.Color;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.SectionIndexer;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class AddMember extends Activity implements SectionIndexer{
+	ImageView btn_addMemberBackBtn;
+	ImageView btn_addMemberAdd;
+	ImageView btn_addMemberDone;
+	EditText et_addMemberName;
+	EditText et_addMembermobile;
+	EditText et_addMemberSearch;
+
+	RelativeLayout rl_addMemberNew;
+
+	String memberName, memberMobile, searchName;
+	ArrayList<Member> member_data = new ArrayList<Member>();
+	ArrayList<Member> search_data = new ArrayList<Member>();
+	ArrayList<String> headerValue = new ArrayList<String>();
+	ListView lv_memberList;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.addmember);
+
+		btn_addMemberBackBtn = (ImageView) findViewById(R.id.addMemberBackBtn);
+		btn_addMemberAdd = (ImageView) findViewById(R.id.addMemberAdd);
+		btn_addMemberDone = (ImageView) findViewById(R.id.addMemberDone);
+		et_addMemberName = (EditText) findViewById(R.id.addMemberName);
+		et_addMembermobile = (EditText) findViewById(R.id.addMembermobile);
+		et_addMemberSearch = (EditText) findViewById(R.id.addMemberSearch);
+		lv_memberList = (ListView) findViewById(R.id.memberList);
+
+		rl_addMemberNew = (RelativeLayout) findViewById(R.id.addMemberNew);
+		rl_addMemberNew.setVisibility(View.GONE);
+
+		new MemberList().execute();
+
+		/* Click to search by member name */
+		et_addMemberSearch.addTextChangedListener(new TextWatcher() {
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before,
+					int count) {
+
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {
+
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+				// if (0 != searchName.getText().length()) {
+				searchByNameCode();
+				// }
+			}
+		});
+
+		/* Click to add new member */
+
+		btn_addMemberAdd.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+
+				btn_addMemberDone.setVisibility(View.VISIBLE);
+				btn_addMemberAdd.setVisibility(View.INVISIBLE);
+				btn_addMemberBackBtn.setVisibility(View.INVISIBLE);
+				rl_addMemberNew.setVisibility(View.VISIBLE);
+			}
+		});
+
+		/* Click to insert new member details and hiding add member layout */
+		btn_addMemberDone.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+
+				if (et_addMemberName.length() > 0
+						&& et_addMembermobile.length() > 0) {
+
+					new AddMemberAsynTask().execute();
+				} else {
+					Toast.makeText(getApplicationContext(),
+							"Please enter all field values", Toast.LENGTH_LONG)
+							.show();
+				}
+
+			}
+		});
+
+		btn_addMemberBackBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+
+				/*************** incomplete ****************/
+
+			}
+		});
+
+	}
+
+	private void searchByNameCode() {
+		searchName = et_addMemberSearch.getText().toString();
+		int textLength = searchName.length();
+
+		search_data.clear();
+
+		for (int i = 0; i < member_data.size(); i++) {
+			String memberMainName = member_data.get(i).get_name();
+			if (textLength <= memberMainName.length()) {
+				// compare the String in EditText with Names in the ArrayList
+				if (searchName.equalsIgnoreCase(memberMainName.substring(0,
+						textLength))) {
+					search_data.add(member_data.get(i));
+				}
+
+			}
+		}
+
+		headerValue.clear();
+		for (int i = 0; i < search_data.size(); i++) {
+			headerValue.add("");
+		}
+		MemberList_Adapter mAdapter = new MemberList_Adapter(AddMember.this,
+				R.layout.memberrow, search_data);
+		lv_memberList.setAdapter(mAdapter);
+		mAdapter.notifyDataSetChanged();
+	}
+
+	/**
+	 * Class Name : AddMemberAsynTask Purpose : Class to add member on
+	 * background
+	 */
+	class AddMemberAsynTask extends AsyncTask<Void, Void, String> {
+		ProgressDialog pd;
+
+		String mStatus, mMessage;
+
+		@Override
+		protected void onPreExecute() {
+			pd = new ProgressDialog(AddMember.this);
+			pd.setIndeterminate(true);
+			pd.setMessage("Adding member...");
+			pd.setCancelable(false);
+			pd.show();
+			super.onPreExecute();
+		}
+
+		@Override
+		protected String doInBackground(Void... params) {
+
+			try {
+
+				String URL = getResources().getString(R.string.URL);
+				String adminID = getResources().getString(R.string.adminID);
+
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(URL);
+				MultipartEntity multiEntity = new MultipartEntity();
+
+				multiEntity.addPart("call", new StringBody("addMember"));
+
+				multiEntity.addPart("name", new StringBody(et_addMemberName
+						.getText().toString()));
+				multiEntity.addPart("phone", new StringBody(et_addMembermobile
+						.getText().toString()));
+				multiEntity.addPart("adminID", new StringBody(adminID));
+
+				post.setEntity(multiEntity);
+				HttpResponse response = client.execute(post);
+				String res = EntityUtils.toString(response.getEntity());
+
+				Log.v("responce", "Response===" + res);
+				JSONObject json1 = new JSONObject(res);
+
+				mStatus = json1.getString("Status");
+				mMessage = json1.getString("Message");
+
+				if (mStatus.equalsIgnoreCase("Success")) {
+					return "success";
+				}
+				if (!mMessage.equalsIgnoreCase("OK")) {
+					return mMessage;
+				}
+
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			if (pd.isShowing()) {
+				if (result.equalsIgnoreCase("success")) {
+
+					btn_addMemberDone.setVisibility(View.INVISIBLE);
+					btn_addMemberAdd.setVisibility(View.VISIBLE);
+					btn_addMemberBackBtn.setVisibility(View.VISIBLE);
+					rl_addMemberNew.setVisibility(View.GONE);
+
+					Toast.makeText(getApplicationContext(),
+							"Member added successfully", Toast.LENGTH_LONG)
+							.show();
+
+					new MemberList().execute();
+
+				} else {
+					Toast.makeText(getApplicationContext(), mMessage,
+							Toast.LENGTH_LONG).show();
+				}
+				pd.dismiss();
+			}
+			super.onPostExecute(result);
+		}
+	}
+
+	/**
+	 * Class Name : MemberList Purpose : To get data from service in background
+	 * and show them in listview
+	 */
+	class MemberList extends AsyncTask<Void, Void, Void> {
+		private String Error = null;
+		ProgressDialog pd;
+		String res;
+
+		@Override
+		protected void onPreExecute() {
+			
+			pd = new ProgressDialog(AddMember.this);
+			pd.setIndeterminate(true);
+			pd.setMessage("Loading member details, Please wait..");
+			pd.setCancelable(false);
+			pd.show();
+			super.onPreExecute();
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			try {
+				String URL = getResources().getString(R.string.URL);
+				String adminID = getResources().getString(R.string.adminID);
+
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(URL);
+				MultipartEntity multiEntity = new MultipartEntity();
+
+				multiEntity.addPart("call", new StringBody("getAllMembers"));
+				multiEntity.addPart("adminID", new StringBody(adminID));
+				post.setEntity(multiEntity);
+
+				HttpResponse response = client.execute(post);
+				res = EntityUtils.toString(response.getEntity());
+
+				Log.v("responce", "Response===" + res.toString());
+
+			} catch (Exception e) {
+				Error = e.getMessage();
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			if (pd.isShowing()) {
+				if (Error != null) {
+
+				} else {
+					try {
+						member_data.clear();
+						JSONObject json = new JSONObject(res);
+						JSONArray jsonArray = json.getJSONArray("Result");
+						for (int i = 0; i < jsonArray.length(); i++) {
+							JSONObject resultObj = jsonArray.getJSONObject(i);
+							Member member = new Member();
+
+							member.set_name(resultObj.getString("name"));
+							member.set_phone(resultObj.getString("phone"));
+
+							member_data.add(member);
+						}
+					} catch (Exception e) {
+						// TODO: handle exception
+					}
+
+					headerValue.clear();
+					for (int i = 0; i < member_data.size(); i++) {
+						headerValue.add("");
+					}
+
+					MemberList_Adapter mAdapter = new MemberList_Adapter(
+							AddMember.this, R.layout.memberrow, member_data);
+					lv_memberList.setAdapter(mAdapter);
+					mAdapter.notifyDataSetChanged();
+
+				}
+				pd.dismiss();
+			}
+			super.onPostExecute(result);
+		}
+	}
+
+	public class MemberList_Adapter extends ArrayAdapter<Member> {
+		Activity activity;
+		int layoutResourceId;
+		Member member;
+		String last_item = "-";
+		ArrayList<Member> data = new ArrayList<Member>();
+		//TextView label;
+		View row;
+
+		public MemberList_Adapter(Activity act, int layoutResourceId,
+				ArrayList<Member> data) {
+			super(act, layoutResourceId, data);
+			this.layoutResourceId = layoutResourceId;
+			this.activity = act;
+			this.data = data;
+			notifyDataSetChanged();
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent)
+		{
+			try{
+				LayoutInflater inflater=getLayoutInflater();
+				row = inflater.inflate(R.layout.memberrow, parent, false);
+
+				LinearLayout L1 = (LinearLayout)row.findViewById(R.id.l1);
+				TextView header = new TextView(getApplicationContext());
+				
+				TextView memberName = new TextView(getApplicationContext());
+				TextView memberPhone = new TextView(getApplicationContext());
+				
+				System.out.println("LAST : " + last_item);
+				
+				memberName.setPadding(4, 1, 1, 1);
+				L1.setPadding(4, 4, 4, 4);
+
+				memberName.setTextColor(Color.BLACK);
+
+							
+
+				String label1 = data.get(position).get_name();
+				char firstChar = label1.toUpperCase().charAt(0);
+
+				if (position == 0) {
+					setSection(L1, label1);
+				} else {
+					String preLabel = data.get(position - 1).get_name();
+					char preFirstChar = preLabel.toUpperCase().charAt(0);
+					if (firstChar != preFirstChar) {
+						setSection(L1, label1);
+					} else {
+						header.setVisibility(View.GONE);
+					}
+				}
+
+				memberName.setText(data.get(position).get_name());
+				memberPhone.setText(data.get(position).get_phone());
+				L1.addView(memberName);
+				L1.addView(memberPhone);
+			}catch(Exception e){
+
+			}
+			return row;
+		}
+	
+		/*public View getView(int position, View convertView, ViewGroup parent) {
+			View row = convertView;
+			MemberHolder holder = null;
+
+			if (row == null) {
+				LayoutInflater inflater = LayoutInflater.from(activity);
+				row = inflater.inflate(layoutResourceId, parent, false);
+
+				holder = new MemberHolder();
+				holder.tv_member_name_header = (TextView) row
+						.findViewById(R.id.member_name_header);
+				holder.tv_member_name_txt = (TextView) row
+						.findViewById(R.id.member_name_txt);
+				holder.tv_member_mobile = (TextView) row
+						.findViewById(R.id.member_mobile);
+				row.setTag(holder);
+			} else {
+				holder = (MemberHolder) row.getTag();
+			}
+			member = data.get(position);
+
+			if (!Last_item.equalsIgnoreCase(String.valueOf(member.get_name()
+					.charAt(0)))) {
+				Last_item = String.valueOf(member.get_name().charAt(0));
+				holder.tv_member_name_header.setText(Last_item.toUpperCase());
+				headerValue.set(position, Last_item.toUpperCase()); // to backup position which having header value in headerValue array 
+			} else {
+				headerValue.set(position, "");
+			}
+
+			if (!headerValue.get(position).equals("")) {
+				holder.tv_member_name_header.setText(headerValue.get(position)
+						.toString());
+				holder.tv_member_name_header.setVisibility(View.VISIBLE);
+			} else {
+				holder.tv_member_name_header.setVisibility(View.GONE);
+			}
+
+			holder.tv_member_name_txt.setText(member.get_name());
+			holder.tv_member_mobile.setText(member.get_phone());
+			return row;
+
+		}*/
+
+		class MemberHolder {
+			TextView tv_member_name_header;
+			TextView tv_member_name_txt;
+			TextView tv_member_mobile;
+		}
+
+	}
+
+	@Override
+	public void onBackPressed() {
+		// TODO Auto-generated method stub
+		btn_addMemberDone.setVisibility(View.INVISIBLE);
+		btn_addMemberAdd.setVisibility(View.VISIBLE);
+		btn_addMemberBackBtn.setVisibility(View.VISIBLE);
+		rl_addMemberNew.setVisibility(View.GONE);
+
+		super.onBackPressed();
+	}
+
+	@Override
+	public Object[] getSections() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getSectionForPosition(int position) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public int getPositionForSection(int section) {
+		// TODO Auto-generated method stub
+		/*if (section == 35) {
+			return 0;
+		}*/
+		for (int i = 0; i < member_data.size(); i++) {
+			String l = member_data.get(i).get_name();
+			char firstChar = l.toUpperCase().charAt(0);
+			if (firstChar == section) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	private void setSection(LinearLayout header, String label) {
+		TextView text = new TextView(getBaseContext());
+		// header.setBackgroundColor(0xffaabbcc);
+		text.setTextColor(Color.BLACK);
+		text.setText(label.substring(0, 1).toUpperCase());
+		text.setTextSize(20);
+		text.setPadding(5, 0, 0, 0);
+		text.setGravity(Gravity.CENTER_VERTICAL);
+		header.addView(text);
+	}
+
+}

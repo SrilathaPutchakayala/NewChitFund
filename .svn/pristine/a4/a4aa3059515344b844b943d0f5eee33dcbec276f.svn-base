@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <LinearLayout
+        android:id="@+id/ll_custom_member_list_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:layout_centerVertical="true"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_memberName"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Member Name 01"
+            android:textColor="@color/Gray20"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/tv_bidAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:text="28000"
+            android:textColor="#63af5d"
+            android:textSize="17sp" />
+        
+        <EditText
+            android:id="@+id/et_bidAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:hint="Amount"
+            android:inputType="number"
+            android:singleLine="true"
+            android:paddingLeft="10dp"
+            android:background="@drawable/members_list_filed_img"
+            android:textColor="@color/Gray20"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:id="@+id/iv_editButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/edit_button" />
+        
+        <ImageView
+            android:id="@+id/iv_bidButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/bid_button" />
+    </LinearLayout>
+
+</RelativeLayout>

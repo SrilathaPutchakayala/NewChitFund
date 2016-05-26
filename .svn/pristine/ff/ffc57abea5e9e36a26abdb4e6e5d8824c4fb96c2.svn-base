@@ -1,0 +1,114 @@
+/***************************************************************
+ * 
+ * Project Name : Chitfund
+ * Class Name   : ChitDetails
+ * DateTime     : 27-May-2014 04:15 PM 
+ * Developer    : Durga Prasad B
+ * Company      : Sagarsoft India Ltd.
+ * 
+ * Description  :
+ * ------------------------------------------------------------- 
+ * This class is used to display chit full details.
+ * Here user will have the options differentiated by his/her role.
+ * For admin he/she will get Bidding,Members and Report Buttons.
+ * For user he/she will get Bidding button only. 
+ * 
+ * On clicking Bidding button it will open Bidding List.
+ * On clicking Members button it will open Members List.
+ * On clicking Reports button all chit details will send to admin
+ * by email. 
+ * -------------------------------------------------------------
+ * 
+ * *************************************************************/
+
+package com.newchitfund.androidclient;
+
+import com.newchitfund.businessobjects.Chit;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class ChitDetails extends Activity{
+	Chit chitDetails = new Chit();
+
+	TextView chitName,ownerName,totalAmount,noOfMembers,noOfMonths,startDate,payDate,bidDate,ownerMonth;
+	
+	ImageView biddingButton,membersButton,reportsButton;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		
+		setContentView(R.layout.chit_details);
+		
+		chitName = (TextView)findViewById(R.id.tv_chitName);
+		ownerName = (TextView)findViewById(R.id.tv_ownerName);
+		totalAmount = (TextView)findViewById(R.id.tv_totalAmount);
+		noOfMembers = (TextView)findViewById(R.id.tv_noOfMembers);
+		noOfMonths = (TextView)findViewById(R.id.tv_noOfMonths);
+		startDate = (TextView)findViewById(R.id.tv_startDate);
+		payDate = (TextView)findViewById(R.id.tv_payDate);
+		bidDate = (TextView)findViewById(R.id.tv_bidDate);
+		ownerMonth = (TextView)findViewById(R.id.tv_ownerMonth);
+		
+		biddingButton = (ImageView)findViewById(R.id.iv_Bidding_button);
+		membersButton= (ImageView)findViewById(R.id.iv_Members_button);
+		reportsButton = (ImageView)findViewById(R.id.iv_Reports_button);
+		
+		Bundle bundle = getIntent().getExtras();
+		if(bundle!=null)
+		{
+			chitDetails = (Chit) bundle.getSerializable("chit");
+		}
+		
+		chitName.setText(chitDetails.get_chitName());
+		ownerName.setText(chitDetails.get_ownerName());
+		totalAmount.setText(chitDetails.get_chitAmount());
+		noOfMembers.setText(chitDetails.get_noOfMembers());
+		noOfMonths.setText(chitDetails.get_noOfMonths());
+		startDate.setText(chitDetails.get_startDate());
+		payDate.setText(chitDetails.get_paymentDate());
+		bidDate.setText(chitDetails.get_bidDate());
+		ownerMonth.setText(chitDetails.get_ownerMonth());
+		
+		//Toast.makeText(getApplicationContext(), chitDetails.get_chitName(), Toast.LENGTH_SHORT).show();
+	}
+	
+	/**
+	 * Method Name : goBack 
+	 * @param v    : View Object
+	 * Return Type : void
+	 * 
+	 * Description : This method is used to redirect the screen
+	 * to ViewChits Screen.
+	 */
+	public void goBack(View v)
+	{
+		Intent viewChitsIntent = new Intent(this,ViewChits.class);
+		startActivity(viewChitsIntent);
+		finish();
+	}
+	
+	/**
+	 * Method Name : getBiddingDetails 
+	 * @param v    : View Object
+	 * Return Type : void
+	 * 
+	 * Description : This method is used to redirect the screen
+	 * to Bidding List Screen.
+	 */
+	public void getBiddingDetails(View v)
+	{
+//		Intent viewChitsIntent = new Intent(this,ViewChits.class);
+//		startActivity(viewChitsIntent);
+//		finish();
+		Toast.makeText(getApplicationContext(), "Bidding Button Clicked", Toast.LENGTH_SHORT).show();
+	}
+	
+}

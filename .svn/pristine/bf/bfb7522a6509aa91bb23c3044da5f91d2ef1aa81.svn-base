@@ -1,0 +1,55 @@
+package com.newchitfund.imagecaching;
+import java.io.File;
+import android.content.Context;
+
+/**
+ * Cache images to a location in the device
+ * @author a.srilatha
+ *
+ */
+public class FileCache {
+    
+    private File cacheDir;
+    
+    /**
+     * Caches the images to "Captr" directory of the device.
+     * @param context--Context of the activity
+     */
+    public FileCache(Context context){
+        //Find the dir to save cached images
+        if (android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED))
+            cacheDir=new File(android.os.Environment.getExternalStorageDirectory(),"ChitFund");
+        else
+            cacheDir=context.getCacheDir();
+        if(!cacheDir.exists())
+            cacheDir.mkdirs();
+    }
+    
+    /**
+     * Retrieves the file from the cached image location.
+     * @param url--Url of the image.
+     * @return File--returns the file of cached image.
+     */
+    public File getFile(String url){
+        //I identify images by hashcode. Not a perfect solution, good for the demo.
+        String filename=String.valueOf(url.hashCode());
+        //Another possible solution (thanks to grantland)
+        //String filename = URLEncoder.encode(url);
+        File f = new File(cacheDir, filename);
+        return f;
+        
+    }
+    
+    /**
+     * Clears the cache from the created "Captr" directory of device.
+     */
+    public void clear(){
+        File[] files=cacheDir.listFiles();
+        if(files==null)
+            return;
+        for(File f:files)
+            f.delete();
+    }
+    
+
+}

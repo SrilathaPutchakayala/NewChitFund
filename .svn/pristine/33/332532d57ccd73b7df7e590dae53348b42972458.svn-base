@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:background="#505F63"
+        android:padding="0dp" >
+
+        <ImageView
+            android:id="@+id/iv_members_list_back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/back_icon2"
+            android:onClick="goBack" />
+
+        <TextView
+            android:id="@+id/tv_members_list_action_bar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="2dp"
+            android:layout_toRightOf="@+id/iv_members_list_back_button"
+            android:clickable="true"
+            android:onClick="goBack"
+            android:text="@string/bidding_details"
+            android:textColor="@color/White"
+            android:textSize="@dimen/action_bar_title_size" />
+
+        <ImageView
+            android:id="@+id/chitDetailsHomeBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="10dp"
+            android:background="@drawable/home"
+            android:onClick="goHome" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_margin="8dp"
+        android:background="@drawable/members_list_background"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="33dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/tv_members_list_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:text="@string/members_list"
+                android:textColor="#FFFFFF"
+                android:textSize="@dimen/pop_up_title_size" />
+
+            <ImageView
+                android:id="@+id/iv_bidding_list_refresh_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="1.5dp"
+                android:onClick="refresh"
+                android:src="@drawable/refresh_icon" />
+
+            <ImageView
+                android:id="@+id/iv_members_list_close_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="1.5dp"
+                android:contentDescription="@string/app_name"
+                android:onClick="closeList"
+                android:src="@drawable/close_img" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/rl_user_highest_bid_block"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
+            android:background="@drawable/members_list_top_header_img"
+            android:gravity="center_vertical"
+            android:padding="0dp" >
+
+            <LinearLayout
+                android:id="@+id/ll_user_highest_bid_1"
+                android:layout_width="@dimen/members_list_bid_date_width"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/tv_highest_bidDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bid Date: 07/06/14"
+                    android:textColor="#e64646"
+                    android:textSize="@dimen/members_list_bid_date_size" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_user_highest_bid_2"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/ll_user_highest_bid_1"
+                android:gravity="right"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:id="@+id/tv_highest_bidAmount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rs. 11000"
+                        android:textColor="@color/Gray20"
+                        android:textSize="@dimen/members_list_amount_small_size" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:id="@+id/tv_highest_bid_memberName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Member Name 01"
+                        android:textColor="@color/Gray20"
+                        android:textSize="@dimen/members_list_member_name_small_size" />
+                </LinearLayout>
+            </LinearLayout>
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/tv_error_msg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical|center_horizontal"
+            android:textColor="#333"
+            android:textSize="@dimen/pop_up_title_size" />
+
+        <ListView
+            android:id="@+id/lv_members_list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginLeft="1dp"
+            android:layout_marginRight="1dp"
+            android:cacheColorHint="#00000000"
+            android:divider="@drawable/list_separator"
+            android:dividerHeight="0dp"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:listSelector="#00000000" >
+        </ListView>
+    </LinearLayout>
+
+</LinearLayout>

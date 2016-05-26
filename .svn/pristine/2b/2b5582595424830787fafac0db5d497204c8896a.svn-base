@@ -1,0 +1,148 @@
+<resources>
+
+    <!-- Service Related Strings -->
+    <string name="adminID">2</string>
+    <string name="URL">http://www.sirichits.in/chitfund/services/</string>
+
+    <!-- New Chit Fund Screen -->
+    <string name="app_name">EasyChit</string>
+
+    <!-- values used for chit creations screen START -->
+    <string name="create_new_chit">Create New Chit</string>
+    <string name="add_members">Add Members</string>
+    <string name="owner_month">Owner Month</string>
+    <string name="bid_date">Bid Date</string>
+    <string name="pay_date">Pay Date</string>
+    <string name="start_date">Start Month</string>
+    <string name="no_of_months">No. of Months</string>
+    <string name="no_of_members">No. of Members</string>
+    <string name="total_amount">Total Amount</string>
+    <string name="owner_name">Owner Name</string>
+    <string name="chit_name">Chit Name</string>
+    <string name="omnerMonth_prompt">Select Month</string>
+    <string name="add_owner">Add Owner</string>
+    <string name="yestext">Yes</string>
+    <string name="notext">No</string>
+    <string-array name="omnerMonth_array">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
+     <string name="payBid_prompt">Select Date</string>
+    <string-array name="payBid_array">
+        <item>01</item>
+        <item>02</item>
+        <item>03</item>
+        <item>04</item>
+        <item>05</item>
+        <item>06</item>
+        <item>07</item>
+        <item>08</item>
+        <item>09</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <item>18</item>
+        <item>19</item>
+        <item>20</item>
+        <item>21</item>
+        <item>22</item>
+        <item>23</item>
+        <item>24</item>
+        <item>25</item>
+        <item>26</item>
+        <item>27</item>
+        <item>28</item>
+    </string-array>
+    
+    <!-- values used for chit creations screen END -->
+
+
+    <!-- Add Member Screen -->
+    <string name="add_member">Add Member</string>
+    <string name="full_name">Full Name</string>
+    <string name="mobile">Mobile</string>
+    <string name="search_member_name">Search Member Name</string>
+    
+    <!-- Sign Up Screen START -->
+    <string name="tv_backIcon">Sign Up</string>
+    <string name="iv_signUpLine">Sign Up Line</string>
+    <string name="iv_separator">Separator</string>
+    <string name="iv_picCircle">Member Profile Picture</string>
+    <string name="et_name">Name</string>
+    <string name="et_email">Email Address</string>
+    <string name="et_phone">Phone Number</string>
+    <string name="et_password">Password</string>
+	<string name="et_confirmPassword">Confirm Password</string>
+    <!-- Sign Up Screen END -->
+
+    <!-- Login Screen START -->
+    <string name="iv_logo">Logo</string>
+    <string name="et_mUsername">Username</string>
+    <string name="et_mPassword">Password</string>
+    <string name="tv_forgotPassword">Forgot Password?</string>
+    <string name="tv_notMember">Not a Member?</string>
+    <string name="tv_loginSignUp">Sign up now</string>
+    <!-- Login Screen END -->
+    
+    <!-- Settings Screen START -->
+    <string name="btn_settingsLabel">Settings</string>
+    <string name="btn_backImage">Back button image</string>
+    <string name="btn_editSettingsImage">Settings edit button image</string>
+    <string name="btn_saveSettingsImage">Settings save/done button image</string>
+    <string name="iv_profPic">Profile picture image</string>
+    <string name="et_mName">Name</string>
+    <string name="et_mEmail">Email Address</string>
+    <string name="et_mPhone">Phone Number</string>
+    <string name="et_mOldPassword">Old Password</string>
+    <string name="et_mNewPassword">New Password</string>
+    <string name="et_mConfirmPassword">Confirm Password</string>
+    <string name="tv_logout">Logout</string>
+    <!-- Settings Screen END -->
+
+	<!-- Menu screen START -->
+	<string name="btn_categoriesLabel">Categories</string>
+	<!-- Menu screen END -->
+	
+    <!-- View Chit Details Screen Strings -->
+    <string name="view_chits">View Chits</string>
+    <string name="chit_details">Chit Details</string>
+    <string name="bidding_details">Bidding Details</string>
+    <string name="bidding_list">Bidding List</string>
+    <string name="members_list">Members List</string>
+    <string name="payment_history">Payments History</string>
+    
+    <string name="start_month_label">Start Month: </string>
+    <string name="bid_date_label">Bid Date: </string>
+    <string name="pay_date_label">Pay Date: </string>
+    
+    <!-- Chits History START -->
+    <string name="tv_chitsHistoryTitle">Chits History</string>
+	<string name="iv_chitsHistoryHome">Home Image</string>
+    <!-- Chits History END -->
+    
+    <!-- Rupee Strings -->
+    <string name="Rupee">\u20B9</string> 
+	<string name="Rs">\u20A8</string> 
+    
+    <!-- PaymentScreen -->
+    <string name="payment_header">Payment Status</string>
+    <string name="Spinner_monthyear">Select Month</string>
+    
+    <string name="approve_disapprove">Approve/Disapprove</string>
+    
+</resources>

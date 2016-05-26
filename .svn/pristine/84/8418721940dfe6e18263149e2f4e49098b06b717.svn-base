@@ -1,0 +1,76 @@
+package com.newchitfund.androidclient;
+
+import com.newchitfund.businessobjects.Chit;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class ChitDetails extends Activity{
+	Chit chitDetails = new Chit();
+
+	TextView chitName,ownerName,totalAmount,noOfMembers,noOfMonths,startDate,payDate,bidDate,ownerMonth;
+	
+	ImageView biddingButton,membersButton,reportsButton;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		
+		setContentView(R.layout.chit_details);
+		
+		chitName = (TextView)findViewById(R.id.tv_chitName);
+		ownerName = (TextView)findViewById(R.id.tv_ownerName);
+		totalAmount = (TextView)findViewById(R.id.tv_totalAmount);
+		noOfMembers = (TextView)findViewById(R.id.tv_noOfMembers);
+		noOfMonths = (TextView)findViewById(R.id.tv_noOfMonths);
+		startDate = (TextView)findViewById(R.id.tv_startDate);
+		payDate = (TextView)findViewById(R.id.tv_payDate);
+		bidDate = (TextView)findViewById(R.id.tv_bidDate);
+		ownerMonth = (TextView)findViewById(R.id.tv_ownerMonth);
+		
+		biddingButton = (ImageView)findViewById(R.id.iv_Bidding_button);
+		membersButton= (ImageView)findViewById(R.id.iv_Members_button);
+		reportsButton = (ImageView)findViewById(R.id.iv_Reports_button);
+		
+		Bundle bundle = getIntent().getExtras();
+		if(bundle!=null)
+		{
+			chitDetails = (Chit) bundle.getSerializable("chit");
+		}
+		
+		chitName.setText(chitDetails.get_chitName());
+		ownerName.setText(chitDetails.get_ownerName());
+		totalAmount.setText(chitDetails.get_chitAmount());
+		noOfMembers.setText(chitDetails.get_noOfMembers());
+		noOfMonths.setText(chitDetails.get_noOfMonths());
+		startDate.setText(chitDetails.get_startDate());
+		payDate.setText(chitDetails.get_paymentDate());
+		bidDate.setText(chitDetails.get_bidDate());
+		ownerMonth.setText(chitDetails.get_ownerMonth());
+		
+		//Toast.makeText(getApplicationContext(), chitDetails.get_chitName(), Toast.LENGTH_SHORT).show();
+	}
+	
+	public void goBack(View v)
+	{
+		Intent viewChitsIntent = new Intent(this,ViewChits.class);
+		startActivity(viewChitsIntent);
+		finish();
+		//Toast.makeText(getApplicationContext(), "Back Clicked", Toast.LENGTH_SHORT).show();
+	}
+	
+	public void getBiddingDetails(View v)
+	{
+//		Intent viewChitsIntent = new Intent(this,ViewChits.class);
+//		startActivity(viewChitsIntent);
+//		finish();
+		Toast.makeText(getApplicationContext(), "Bidding Button Clicked", Toast.LENGTH_SHORT).show();
+	}
+	
+}

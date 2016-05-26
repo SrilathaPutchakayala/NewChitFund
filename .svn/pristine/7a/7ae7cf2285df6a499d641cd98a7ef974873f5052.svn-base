@@ -1,0 +1,361 @@
+/**
+ * Project Name	: Chitfund
+ * Class Name	: Login
+ * Date			: 29--05-2014, 04:09 PM
+ * Developer	: Sanyasi Rao
+ * Company		: Sagarsoft India Ltd.
+ * 
+ * Description  :		
+ * ------------------------------------------------------------------------------------------------------------------------------------------
+ * This class shows up Login screen to user.
+ * It authenticate user by validating user credentials when user click on Login button
+ * Form Fields - Username (Registered Mobile number) and Password.
+ * It sends mail to registered user email ID when user click on 'Forgot Password' link provided username (Registered Mobile number)
+ * When user clicks on 'Sign up now' button it shows Sign up screen to user. 
+ * ------------------------------------------------------------------------------------------------------------------------------------------
+ */
+package com.newchitfund.androidclient;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.graphics.Typeface;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class Login extends Activity {
+	
+	private EditText et_userName;
+	private EditText et_password;
+	private TextView tv_forgotPass;
+	private TextView tv_notMember;
+	private TextView tv_signUp;
+	
+	protected String evMUsernameVal=null, etMPasswordVal=null;
+	protected JSONObject jsonResponse;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		setContentView(R.layout.login);
+		super.onCreate(savedInstanceState);
+		
+		Button btnLogin = (Button) findViewById(R.id.btn_login);
+		
+		
+		// Get template objects
+		tv_forgotPass = (TextView) findViewById(R.id.tv_forgotPassword);
+		tv_notMember = (TextView) findViewById(R.id.tv_notMember);
+		tv_signUp = (TextView) findViewById(R.id.tv_signUp);
+		
+		// Change fonts of text in the template
+		tv_forgotPass.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+		tv_notMember.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+		tv_signUp.setTypeface((Typeface.createFromAsset(getAssets(),"fonts/Roboto-Light.ttf")));
+		
+		/**
+		 * This click event is triggered when user clicks on Login button
+		 * It validates user input.
+		 * It authenticate user data by service.
+		 * It shows Categories screen to user on successful authentication.
+		 */
+		btnLogin.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+
+				Boolean validation = true; 
+				
+				// Get template objects
+				et_userName = (EditText) findViewById(R.id.et_mUsername);
+				et_password = (EditText) findViewById(R.id.et_mPassword);
+				
+				// Get object values
+				evMUsernameVal = et_userName.getText().toString();
+				etMPasswordVal = et_password.getText().toString();
+				
+				// Validate user input
+				if(evMUsernameVal==null || evMUsernameVal.length()<=0) {
+					Toast.makeText(getApplicationContext(), "Please enter Username", Toast.LENGTH_LONG).show();
+					validation = false;
+				}else if(evMUsernameVal.length()!=10) {
+					Toast.makeText(getApplicationContext(), "Please enter valid Username", Toast.LENGTH_LONG).show();
+					validation = false;
+				}
+
+				if(etMPasswordVal==null || etMPasswordVal.length()<=0) {
+					Toast.makeText(getApplicationContext(), "Please enter Password", Toast.LENGTH_LONG).show();
+					validation = false;
+				}else if(etMPasswordVal.length()<3) {
+					Toast.makeText(getApplicationContext(), "Please enter valid Password", Toast.LENGTH_LONG).show();
+					validation = false;
+				}
+				
+				// Authenticate user
+				if(validation) {
+					new LoginAsyncTask().execute();
+				}
+				
+			}
+		});
+
+		// To send password to user by mail using service
+		tv_forgotPass.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+				// Get template object
+				et_userName = (EditText) findViewById(R.id.et_mUsername);
+				
+				// Get object value
+				evMUsernameVal = et_userName.getText().toString();
+				
+				if(evMUsernameVal==null || evMUsernameVal.length()<=0) {
+					Toast.makeText(getApplicationContext(), "Please enter Username to get password to your registered email ID", Toast.LENGTH_LONG).show();
+				}else if(evMUsernameVal.length()!=10) {
+					Toast.makeText(getApplicationContext(), "Please enter valid Username", Toast.LENGTH_LONG).show();
+				}
+				else {
+					new ForgotAsyncTask().execute();
+				}
+			}
+		});
+		
+	}
+	
+	public void signUpNow(View v) {
+		startActivity(new Intent(Login.this, SignUp.class));
+		finish();
+	}
+
+	
+	/**
+	 * Class to add new user details in background 
+	 * @author sunny
+	 * 
+	 */
+	class LoginAsyncTask extends AsyncTask<Void, Void, String> {
+		
+		ProgressDialog pd;
+		String sStatus=null, sMessage=null;
+		
+		@Override
+		protected void onPreExecute() {
+			pd = new ProgressDialog(Login.this);
+			pd.setIndeterminate(true);
+			pd.setCancelable(false);
+			pd.setMessage("Please wait...");
+			pd.show();
+			super.onPreExecute();
+		}
+
+		@Override
+		protected String doInBackground(Void... arg0) {
+			// TODO Auto-generated method stub
+			try {
+				
+				String URL = getResources().getString(R.string.URL);
+				String adminID = getResources().getString(R.string.adminID);
+				
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(URL);
+				MultipartEntity multiEntity = new MultipartEntity();
+				
+				multiEntity.addPart("phone", new StringBody(evMUsernameVal));
+				multiEntity.addPart("password", new StringBody(etMPasswordVal));
+
+				// Value from strings.xml
+				multiEntity.addPart("adminID", new StringBody(adminID));
+				
+				// Static values
+				multiEntity.addPart("call", new StringBody("login"));
+				multiEntity.addPart("deviceType", new StringBody("Android/IOS"));
+				multiEntity.addPart("deviceToken", new StringBody("ASD123A"));
+				
+				post.setEntity(multiEntity);
+				HttpResponse response = client.execute(post);
+				String res = EntityUtils.toString(response.getEntity());
+				
+				Log.v("response", "Response: " + res);
+				jsonResponse = new JSONObject(res);
+				
+				sStatus = jsonResponse.getString("Status");
+				sMessage = jsonResponse.getString("Message");
+				
+				if(sStatus.equalsIgnoreCase("Success")) {
+					return "success";
+				}
+				
+				if(!sMessage.equalsIgnoreCase("OK")) {
+					return sMessage;
+				}
+				
+			}catch(UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}catch(ClientProtocolException e) {
+				e.printStackTrace();
+			}catch(IOException e){
+				e.printStackTrace();
+			}catch(JSONException e){
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(String result) {
+			
+			if(pd.isShowing()){
+				
+				if(result.equalsIgnoreCase("success")) {
+					//Toast.makeText(getApplicationContext(), "Welcome", Toast.LENGTH_LONG).show();
+					HashMap<String, String> hMapSignUpDetails = new HashMap<String,String>();
+
+					// Store values in SessionStorage.java
+					try {
+						
+						hMapSignUpDetails.put("MEMBER_ID", jsonResponse.getString("userID"));
+						hMapSignUpDetails.put("MEMBER_NAME", jsonResponse.getString("name"));
+						hMapSignUpDetails.put("MEMBER_EMAIL", jsonResponse.getString("email"));
+						hMapSignUpDetails.put("MEMBER_PROFILE_PIC", jsonResponse.getString("profilePic"));
+						hMapSignUpDetails.put("MEMBER_PHONE", jsonResponse.getString("phone"));
+						hMapSignUpDetails.put("MEMBER_ADMIN_ID", jsonResponse.getString("adminID"));
+						hMapSignUpDetails.put("MEMBER_ROLE", jsonResponse.getString("role"));
+						hMapSignUpDetails.put("MEMBER_MEMBERSHIP", jsonResponse.getString("membershipStatus"));
+						hMapSignUpDetails.put("MEMBER_CREATED_ON", jsonResponse.getString("createdOn"));
+						
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					SessionStorage sessionStorage=new SessionStorage(getApplicationContext());
+					sessionStorage.storeLoginDetails(hMapSignUpDetails);
+					
+					pd.dismiss();
+					
+					// Navigate to Menu
+					Intent menu = new Intent(Login.this, Menu.class);
+					startActivity(menu);
+					finish();					
+				}else {
+					pd.dismiss();
+					
+					// Show message to user
+					Toast.makeText(getApplicationContext(), result, Toast.LENGTH_LONG).show();
+				}
+
+			}
+			super.onPostExecute(result);
+		}
+	}
+
+	
+	/**
+	 * This class sends password by mail to user's registered email ID using service in background. 
+	 * @author sunny
+	 * 
+	 */
+	class ForgotAsyncTask extends AsyncTask<Void, Void, String> {
+		
+		ProgressDialog pd;
+		String sStatus=null, sMessage=null;
+		
+		@Override
+		protected void onPreExecute() {
+			pd = new ProgressDialog(Login.this);
+			pd.setIndeterminate(true);
+			pd.setCancelable(false);
+			pd.setMessage("Please wait...");
+			pd.show();
+			super.onPreExecute();
+		}
+
+		@Override
+		protected String doInBackground(Void... arg0) {
+			// TODO Auto-generated method stub
+			try {
+				
+				String URL = getResources().getString(R.string.URL);
+				
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(URL);
+				MultipartEntity multiEntity = new MultipartEntity();
+				
+				multiEntity.addPart("phone", new StringBody(evMUsernameVal));
+				
+				// Static values
+				multiEntity.addPart("call", new StringBody("forgotPassword"));
+				multiEntity.addPart("deviceType", new StringBody("Android/IOS"));
+				multiEntity.addPart("deviceToken", new StringBody("ASD123A"));
+				
+				post.setEntity(multiEntity);
+				HttpResponse response = client.execute(post);
+				String res = EntityUtils.toString(response.getEntity());
+				
+				Log.v("response", "Response: " + res);
+				jsonResponse = new JSONObject(res);
+				
+				sStatus = jsonResponse.getString("Status");
+				sMessage = jsonResponse.getString("Message");
+				
+				if(sStatus.equalsIgnoreCase("Success")) {
+					return "success";
+				}
+				
+				if(!sMessage.equalsIgnoreCase("OK")) {
+					return sMessage;
+				}
+				
+			}catch(UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}catch(ClientProtocolException e) {
+				e.printStackTrace();
+			}catch(IOException e){
+				e.printStackTrace();
+			}catch(JSONException e){
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(String result) {
+			
+			if(pd.isShowing()) {
+				
+				if(result.equalsIgnoreCase("success")) {
+					pd.dismiss();
+					
+					// Show status message to user
+					Toast.makeText(getApplicationContext(), "Password is sent to your registered email ID.", Toast.LENGTH_LONG).show();
+				}
+			}
+			super.onPostExecute(result);
+		}
+	}	
+}

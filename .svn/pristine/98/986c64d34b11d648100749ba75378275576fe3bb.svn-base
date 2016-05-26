@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f3f3f3"
+    tools:context="com.example.uixment.MainActivity$PlaceholderFragment" >
+
+    <RelativeLayout
+        android:id="@+id/payment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/top_header_bar" >
+
+        <ImageView
+            android:id="@+id/paymentBackBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/back_icon2" />
+
+        <TextView
+            android:id="@+id/paymentheading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+             android:layout_marginLeft="2dp"
+            android:layout_toRightOf="@+id/paymentBackBtn"
+            android:clickable="true"
+            android:text="@string/payment_header"
+            android:textColor="@color/White"
+            android:textSize="@dimen/paymentHeader" />
+        
+        <ImageView
+            android:id="@+id/paymentHomeBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="10dp"
+            android:background="@drawable/home" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/paymentmonthlayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/payment"
+        android:layout_marginTop="1dp"
+        android:background="@drawable/month_selectin_img" >
+
+        <TextView
+            android:id="@+id/selectMonth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="15dp"
+            android:text="Month year"
+            android:textColor="@color/White"
+            android:textSize="@dimen/paymentMonth" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_margin="10dp"
+            android:layout_marginLeft="0dp" >
+
+            <Spinner
+                android:id="@+id/selectMonthSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_margin="15dp"
+                android:spinnerMode="dialog"
+                android:entries="@array/payBid_array"
+			    android:prompt="@string/Spinner_monthyear"
+			    android:visibility="invisible"
+               />
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/paymentmonthlayout" >
+
+        <ListView
+            android:id="@+id/paymentList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:focusable="false"
+            android:dividerHeight="0dp"
+			android:divider="@null"
+            android:focusableInTouchMode="false" >
+        </ListView>
+        
+        <TextView 
+            android:id="@+id/tv_errormsg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="errormsg"
+            android:textSize="@dimen/paymentHeader"
+            android:textColorHighlight="@color/Red"
+            android:layout_margin="15dp"
+            android:visibility="invisible"
+            />
+    </RelativeLayout>
+
+</RelativeLayout>

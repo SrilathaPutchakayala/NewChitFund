@@ -1,0 +1,224 @@
+package com.newchitfund.androidclient;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.R.array;
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+/**
+ * 
+ * @author sunny
+ * Class to do actions for Sign Up screen like add user data using service, validation of data
+ */
+public class SignUp extends Activity {
+	
+	private Button btn_done;
+	private ImageView mProfilePic;
+	private EditText mName;
+	private EditText mEmail;
+	private EditText mPhone;
+	private EditText mPassword;
+	public String mNameVal=null, mEmailVal=null, mPhoneVal=null, mPasswordVal=null;
+	public JSONObject jsonResponse;
+	
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.sign_up);
+		btn_done = (Button) findViewById(R.id.btn_done);
+		btn_done.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+				mProfilePic = (ImageView) findViewById(R.id.iv_picCircle);
+				mName = (EditText) findViewById(R.id.et_name);
+				mEmail = (EditText) findViewById(R.id.et_email);
+				mPhone = (EditText) findViewById(R.id.et_phone);
+				mPassword = (EditText) findViewById(R.id.et_password);
+				
+				mNameVal = mName.getText().toString();
+				mEmailVal = mEmail.getText().toString();
+				mPhoneVal = mPhone.getText().toString();
+				mPasswordVal = mPassword.getText().toString();
+				
+				ArrayList<String> mInput = new ArrayList<String>();
+				mInput.add(mNameVal);
+				mInput.add(mEmailVal);
+				mInput.add(mPhoneVal);
+				mInput.add(mPasswordVal);
+				
+				if(checkEmpty(mInput)) {
+					new SignUpAsyncTask().execute();
+				}else {
+					Toast.makeText(getApplicationContext(), "Please enter all fields", Toast.LENGTH_LONG).show();
+				}
+				
+				
+			}
+			
+		});
+		
+	}
+
+	/**
+	 * To check empty values
+	 * @return 
+	 */
+	protected boolean checkEmpty(ArrayList<String> mInput) {
+		// TODO Auto-generated method stub
+		int i=0;
+		
+		for(i=0; i<mInput.size(); i++) {
+			
+			if(mInput.get(i)==null || mInput.get(i).length()<=0){
+				return false;
+			}
+		}
+		return true;
+	}
+
+
+	/**
+	 * 
+	 * @author sunny
+	 * Class to add new user details in background 
+	 */
+	class SignUpAsyncTask extends AsyncTask<Void, Void, String> {
+		
+		ProgressDialog pd;
+		String sStatus=null, sMessage=null;
+		
+		@Override
+		protected void onPreExecute() {
+			pd = new ProgressDialog(SignUp.this);
+			pd.setIndeterminate(true);
+			pd.setCancelable(false);
+			pd.setMessage("Registation is in process");
+			pd.show();
+			super.onPreExecute();
+		}
+
+		@Override
+		protected String doInBackground(Void... arg0) {
+			// TODO Auto-generated method stub
+			try {
+				
+				String URL = getResources().getString(R.string.URL);
+				String adminID = getResources().getString(R.string.adminID);
+				
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(URL);
+				MultipartEntity multiEntity = new MultipartEntity();
+				
+				multiEntity.addPart("name", new StringBody(mName.getText().toString()));				
+				multiEntity.addPart("email", new StringBody(mEmail.getText().toString()));
+				multiEntity.addPart("phone", new StringBody(mPhone.getText().toString()));
+				multiEntity.addPart("password", new StringBody(mPassword.getText().toString()));
+
+				// Value from strings.xml
+				multiEntity.addPart("adminID", new StringBody(adminID));
+				
+				// Static values
+				multiEntity.addPart("call", new StringBody("registerUser"));
+				multiEntity.addPart("deviceType", new StringBody("Android/IOS"));
+				multiEntity.addPart("deviceToken", new StringBody("ASD123A"));
+				
+				post.setEntity(multiEntity);
+				HttpResponse response = client.execute(post);
+				String res = EntityUtils.toString(response.getEntity());
+				
+				Log.v("response", "Response: " + res);
+				jsonResponse = new JSONObject(res);
+				
+				sStatus = jsonResponse.getString("Status");
+				sMessage = jsonResponse.getString("Message");
+				
+				if(sStatus.equalsIgnoreCase("Success")) {
+					return "success"; 
+				}
+				if(!sMessage.equalsIgnoreCase("OK")) {
+					return sMessage;
+				}
+				
+			}catch(UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}catch(ClientProtocolException e) {
+				e.printStackTrace();
+			}catch(IOException e){
+				e.printStackTrace();
+			}catch(JSONException e){
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(String result) {
+			int i=0;
+			
+			if(pd.isShowing()){
+				if(sMessage.equalsIgnoreCase("success")) {
+					Toast.makeText(getApplicationContext(), sMessage, Toast.LENGTH_LONG);
+					HashMap<String, String> hMapSignUpDetails = new HashMap<String,String>();
+
+					// Store values in SessionStorage.java
+					try {
+						
+						hMapSignUpDetails.put("MEMBER_ID", jsonResponse.getString("userID"));
+						hMapSignUpDetails.put("MEMBER_NAME", jsonResponse.getString("name"));
+						hMapSignUpDetails.put("MEMBER_EMAIL", jsonResponse.getString("email"));
+						hMapSignUpDetails.put("MEMBER_PROFILE_PIC", jsonResponse.getString("profilePic"));
+						hMapSignUpDetails.put("MEMBER_PHONE", jsonResponse.getString("phone"));
+						hMapSignUpDetails.put("MEMBER_ADMIN_ID", jsonResponse.getString("adminID"));
+						hMapSignUpDetails.put("MEMBER_ROLE", jsonResponse.getString("role"));
+						hMapSignUpDetails.put("MEMBER_MEMBERSHIP", jsonResponse.getString("membershipStatus"));
+						hMapSignUpDetails.put("MEMBER_CREATED_ON", jsonResponse.getString("createdOn"));
+						
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					SessionStorage sessionStorage=new SessionStorage(getApplicationContext());
+					sessionStorage.storeLoginDetails(hMapSignUpDetails);
+				}
+				pd.dismiss();
+				
+				// Navigate to Menu
+				Intent menu = new Intent(SignUp.this, Menu.class);
+				startActivity(menu);				
+			}
+			super.onPostExecute(result);
+		}
+	}
+	
+}

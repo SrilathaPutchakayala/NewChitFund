@@ -1,0 +1,156 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/add_own_back_bg"
+    tools:context="com.example.uixment.MainActivity$PlaceholderFragment" >
+
+    <RelativeLayout
+        android:id="@+id/addMember"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <ImageView
+            android:id="@+id/addMemberBackBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_margin="10dp"
+            android:background="@drawable/back_button" />
+
+        <TextView
+            android:id="@+id/addMemberhead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="15dp"
+            android:text="@string/add_member"
+            android:textColor="#fff"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:id="@+id/addMemberAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="10dp"
+            android:background="@drawable/add_transparent_button" />
+
+        <ImageView
+            android:id="@+id/addMemberDone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="10dp"
+            android:src="@drawable/donebutton"
+            android:visibility="invisible" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/addMemberNew"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/addMember"
+        android:background="@drawable/add_fields_back_img" >
+
+        <LinearLayout
+            android:id="@+id/nameLinearLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/addMemberNameLabel"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="@string/full_name"
+                android:textColor="#C0C0C0"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/addMemberName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/fieldimg"
+                android:inputType="textPersonName"
+                android:paddingStart="10dp"
+                android:singleLine="true"
+                android:textColor="@color/edittextcolor" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/nameLinearLayout"
+            android:layout_marginTop="7dp"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/addMemberPhoneLabel"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="@string/mobile"
+                android:textColor="#C0C0C0"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/addMembermobile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/fieldimg"
+                android:inputType="phone"
+                android:maxLength="10"
+                android:paddingStart="10dp"
+                android:singleLine="true"
+                android:textColor="@color/edittextcolor" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/addMemberSearchLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/addMemberNew"
+        android:background="@drawable/searchbar_back_bg" >
+
+        <EditText
+            android:id="@+id/addMemberSearch"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_margin="12dp"
+            android:background="@drawable/searchbar_bg"
+            android:drawableRight="@drawable/searchbar_icon"
+            android:hint="@string/search_member_name"
+            android:paddingEnd="6dp"
+            android:paddingStart="6dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/edittextcolor" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/addMemberSearchLayout" >
+
+        <ListView
+            android:id="@+id/memberList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:focusable="false"
+            android:focusableInTouchMode="false" >
+        </ListView>
+    </RelativeLayout>
+
+</RelativeLayout>

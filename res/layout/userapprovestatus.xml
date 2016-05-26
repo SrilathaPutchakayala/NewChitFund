@@ -1,0 +1,87 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f3f3f3"
+    tools:context="com.example.uixment.MainActivity$PlaceholderFragment" >
+
+    <RelativeLayout
+        android:id="@+id/approveMember"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/top_header_bar" >
+
+        <ImageView
+            android:id="@+id/ivapproveMemberBackBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+           android:layout_marginLeft="10dp"
+            android:background="@drawable/back_icon2" />
+
+        <TextView
+            android:id="@+id/tvapproveMemberhead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+             android:layout_marginLeft="2dp"
+            android:layout_toRightOf="@+id/ivapproveMemberBackBtn"
+            android:clickable="true"
+            android:text="@string/approve_disapprove"
+            android:textColor="@color/White"
+            android:textSize="@dimen/addMemberaddMemberhead" />      
+         <ImageView
+            android:id="@+id/userApproveHomeBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="10dp"
+            android:background="@drawable/home" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/approveMemberSearchLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/approveMember"
+        android:background="@drawable/searchbar_back_bg" >
+
+        <EditText
+            android:id="@+id/etapproveMemberSearch"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="12dp"
+            android:background="@drawable/searchbar_bg"
+            android:drawableRight="@drawable/searchbar_icon"
+            android:hint="@string/search_member_name"
+            android:paddingRight="6dp"
+            android:paddingLeft="6dp"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#a2a2a2"
+            android:textSize="@dimen/addMemberSearchName" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/approveMemberSearchLayout" >
+
+        <ListView
+            android:id="@+id/approvememberList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:focusable="false"
+             android:dividerHeight="2dp"
+			android:divider="@null"
+            android:focusableInTouchMode="false" >
+        </ListView>
+    </RelativeLayout>
+
+</RelativeLayout>

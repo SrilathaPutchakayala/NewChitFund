@@ -1,0 +1,751 @@
+package com.newchitfund.androidclient;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.newchitfund.androidclient.MembersList.Members_Adapter.MemberHolder;
+import com.newchitfund.businessobjects.Chit;
+import com.newchitfund.businessobjects.MemberList;
+
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class MembersList extends Activity{
+
+	String chitID,chitBidDate,bidUserID,chitMemberID,chitOwnerID,chitOwnerMonth;
+
+	Chit chitDetails = new Chit();
+
+	// To store userType,userID shraredPreferences
+	String userName,userType,userID;
+
+	private JSONObject jsonResponse;
+
+	ListView memberListView;
+
+	// Storing all chits details into chits_data array for later retrieval.
+	ArrayList<MemberList> members_data = new ArrayList<MemberList>();
+	ArrayList<Boolean> boolean_members_data = new ArrayList<Boolean>();
+
+
+	JSONArray highestBidData;
+
+	String inputBidDate,outputBidDate;
+
+	RelativeLayout highestBidLayout;
+	TextView highestBidMemberName,highestBidAmount,highestBidDate;
+	TextView errorMsg;
+
+	Long chitTotAmount,highBidAmount,enteredBidAmount;
+
+	MemberHolder holder = null;
+	View row = null;
+
+	String bidApproveStatus = "NO_BID";
+
+	public boolean checkNet;
+
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+
+		super.onCreate(savedInstanceState);
+
+		setContentView(R.layout.members_list);
+		
+		errorMsg = (TextView) findViewById(R.id.tv_error_msg);
+		errorMsg.setVisibility(View.GONE);
+
+		Bundle bundle = getIntent().getExtras();
+		if(bundle!=null)
+		{
+			chitDetails = (Chit) bundle.getSerializable("chit");
+		}
+
+		chitID = chitDetails.get_chitID();
+		chitOwnerID = chitDetails.get_ownerID();
+
+		SimpleDateFormat chitOwnerMonthInputFormat = new SimpleDateFormat("MMMM-yyyy");
+		SimpleDateFormat chitOwnerMonthOutputFormat = new SimpleDateFormat("yyyy-MM");
+
+		chitOwnerMonth = chitDetails.get_ownerMonth();
+
+		try {
+			Date date = chitOwnerMonthInputFormat.parse(chitDetails.get_ownerMonth());
+			chitOwnerMonth = chitOwnerMonthOutputFormat.format(date);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+
+		chitTotAmount = Long.parseLong(chitDetails.get_chitAmount().toString());
+
+		SimpleDateFormat chitDateInputFormat = new SimpleDateFormat("d/M/yyyy");
+		SimpleDateFormat chitDateOutputFormat = new SimpleDateFormat("dd/MM/yy");
+
+		chitBidDate = chitDetails.get_bidDate();
+
+		try {
+			Date date = chitDateInputFormat.parse(chitDetails.get_bidDate());
+			chitBidDate = chitDateOutputFormat.format(date);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+
+		TextView actionBartitle = (TextView) findViewById(R.id.tv_members_list_action_bar_title);
+		actionBartitle.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf"));
+
+		TextView title = (TextView) findViewById(R.id.tv_members_list_title);
+		title.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf"));
+
+
+		highestBidLayout = (RelativeLayout) findViewById(R.id.rl_user_highest_bid_block);
+
+		highestBidMemberName = (TextView)findViewById(R.id.tv_highest_bid_memberName);
+		highestBidMemberName.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf"));
+		highestBidAmount = (TextView)findViewById(R.id.tv_highest_bidAmount);
+		highestBidAmount.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf"));
+		highestBidDate = (TextView)findViewById(R.id.tv_highest_bidDate);
+		highestBidDate.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf"));
+
+		memberListView = (ListView)findViewById(R.id.lv_members_list);
+
+		//Storing sharedPreferences values into userType,userID
+		SharedPreferences sharedpreferences = getSharedPreferences(SessionStorage.ACCOUNT_PREFS_NAME, Context.MODE_PRIVATE);
+		userType = sharedpreferences.getString("MEMBER_ROLE", null);
+		userID = sharedpreferences.getString("MEMBER_ID", null);
+		userName = sharedpreferences.getString("MEMBER_NAME", "");
+
+		highestBidLayout.setVisibility(View.GONE);
+
+		// userType = "USER";
+
+		new GetAllMembers().execute();
+	}
+
+	public void closeList(View v){
+		finish();
+		overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+	}
+
+	public void goBack(View v){
+		finish();
+		overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+	}
+
+	public void refresh(View v){
+		/*
+		Intent refreshActivityIntent = new Intent(this,MembersList.class);
+		refreshActivityIntent.putExtra("chit", chitDetails);
+		startActivity(refreshActivityIntent);
+		finish();
+		*/
+		new GetAllMembers().execute();
+	}
+	
+	
+	/**
+	 * Method Name : goHome 
+	 * Method Name : User defined
+	 * @param v    : View Object
+	 * Return Type : void
+	 * 
+	 * Description : This method is used to redirect the screen
+	 * to Categories Screen.
+	 */
+	public void goHome(View v)
+	{
+		Intent homeActivityIntent = new Intent(this,Categories.class);
+		homeActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		startActivity(homeActivityIntent);
+		finish();
+		overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+	}
+
+	/* Method to hide keyboard start */
+	public static void hideSoftKeyboard(Activity activity) {
+
+		InputMethodManager inputMethodManager = (InputMethodManager) activity
+				.getSystemService(Activity.INPUT_METHOD_SERVICE);
+		if (inputMethodManager.isAcceptingText()) {
+			inputMethodManager.hideSoftInputFromWindow(activity
+					.getCurrentFocus().getWindowToken(), 0);
+		}
+
+	}
+	
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		finish();
+		overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+	}
+
+	/***************************************************************
+	 * 
+	 * Project Name : Chitfund
+	 * Class Name   : GetAllChits
+	 * DateTime     : 27-May-2014 05:00 PM 
+	 * Developer    : Durga Prasad B
+	 * Company      : Sagarsoft India Ltd.
+	 * 
+	 * Description  :
+	 * ------------------------------------------------------------- 
+	 * This class is used to get all chits from REST webservice by
+	 * extending AsyncTask.
+	 * 
+	 * Depends upon user role service url will be changed and the
+	 * list will fetch from webservice and display in listview. 
+	 * -------------------------------------------------------------
+	 * 
+	 * *************************************************************/
+
+	class GetAllMembers extends AsyncTask<Void, Void, String>
+	{
+		private String Error = null;
+		ProgressDialog pd;
+		String res;
+		String sStatus=null, sMessage=null;
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pd = new ProgressDialog(MembersList.this);
+			pd.setMessage("Loading members list, Please wait..");
+			pd.setCancelable(false);
+			pd.show();
+		}
+
+		@Override
+		protected String doInBackground(Void... params) {
+			try {
+
+				checkNet = Utils.isInternetAvailable(MembersList.this);
+
+				if(checkNet) {
+
+					String url;
+
+					String today = new SimpleDateFormat("dd/MM/yy").format(new Date());
+
+					String thisMonth = new SimpleDateFormat("yyyy-MM").format(new Date());
+
+					if(today.equals(chitBidDate) && !thisMonth.equals(chitOwnerMonth))
+						url= getResources().getString(R.string.URL)+"?call=getBidMemberList&chitID="+chitID;
+					else
+						url= getResources().getString(R.string.URL)+"?call=getChitMembers&chitID="+chitID;
+
+					try {
+						HttpClient client = new DefaultHttpClient();
+						HttpPost postAccept = new HttpPost(url);
+						HttpResponse response = client.execute(postAccept);
+						res = EntityUtils.toString(response.getEntity());
+					}
+					catch (Exception e) {
+						Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+						//CommonMethods.showErrorDialog(e.getMessage(), MembersList.this);
+					}
+
+					jsonResponse = new JSONObject(res);
+
+					sStatus = jsonResponse.getString("Status");
+					sMessage = jsonResponse.getString("Message");
+
+					if(sStatus.equalsIgnoreCase("Success")) {
+						return "success";
+					}
+
+					if(!sMessage.equalsIgnoreCase("OK")) {
+						return sMessage;
+					}
+				}
+				else
+				{
+					return "NO_INTERNET";
+				}
+
+			}catch (Exception e) {
+				Error=e.getMessage();
+			}
+			return "SERVICE_ERROR";
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+
+			if(pd.isShowing())
+			{
+				if(!checkNet)
+				{
+					pd.dismiss();
+					Toast.makeText(getApplicationContext(), "Please check network connection", Toast.LENGTH_SHORT).show();
+					//CommonMethods.showErrorDialog("Please check network connection", MembersList.this);
+					finish();
+				}
+
+				if(result.equalsIgnoreCase("success")) {
+
+					String today = new SimpleDateFormat("dd/MM/yy").format(new Date());
+					String thisMonth = new SimpleDateFormat("yyyy-MM").format(new Date());
+
+					//Toast.makeText(getApplicationContext(), "TD: "+today+" BD:"+chitBidDate, Toast.LENGTH_LONG).show();
+
+					SimpleDateFormat inputFormat = new SimpleDateFormat("d/M/yyyy");
+					SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yy");
+
+					try
+					{
+						members_data.clear();
+
+						JSONArray jsonArray = jsonResponse.getJSONArray("Result");
+
+						if(jsonResponse.has("highestBid"))
+						{
+							highestBidData = jsonResponse.getJSONArray("highestBid");
+
+							if(highestBidData.length()>0)
+							{
+								highestBidLayout.setVisibility(View.VISIBLE);
+
+								JSONObject highBidObj = highestBidData.getJSONObject(0);
+
+								highestBidMemberName.setText("("+highBidObj.getString("name")+")");
+
+								String highBidDate= highBidObj.getString("bidDate");
+
+								SimpleDateFormat bidDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+								SimpleDateFormat bidDateOutFormat = new SimpleDateFormat("dd/MM/yy");
+
+								try {
+									Date date = bidDateFormat.parse(highBidDate);
+									highBidDate = bidDateOutFormat.format(date);
+								} catch (ParseException e) {
+									e.printStackTrace();
+								}
+
+								highestBidDate.setText("Bid Date: "+highBidDate);
+
+								highestBidAmount.setText("Highest Bid: "+getResources().getString(R.string.Rupee)+" "+highBidObj.getString("bidAmount"));
+
+								highBidAmount = Long.parseLong(highBidObj.getString("bidAmount").toString());
+
+								bidApproveStatus = highBidObj.getString("bidStatus").toString();
+							}
+							else
+							{
+								highBidAmount = Long.parseLong("0");
+								highestBidLayout.setVisibility(View.GONE);
+							}
+						}
+
+						//Log.v("Result Set:", jsonArray.toString());
+
+						for (int i = 0; i < jsonArray.length(); i++) {
+							JSONObject resultObj = jsonArray.getJSONObject(i);
+							MemberList member = new MemberList();
+
+							member.set_memberID(resultObj.getString("memberID"));
+							member.set_chitMemberID(resultObj.getString("chitMemberID"));
+							member.set_memberName(resultObj.getString("name"));
+							member.set_isOwner(resultObj.getString("isOwner"));
+
+
+							if(today.equals(chitBidDate) && !thisMonth.equals(chitOwnerMonth))
+							{
+								member.set_bidAmount(resultObj.getString("previousBidAmount"));
+								member.set_isWonBid(resultObj.getString("isWonBid"));
+
+								inputBidDate= resultObj.getString("bidDate");
+								outputBidDate = resultObj.getString("bidDate");
+
+								try {
+									Date date = inputFormat.parse(inputBidDate);
+									outputBidDate = outputFormat.format(date);
+								} catch (ParseException e) {
+									e.printStackTrace();
+								}
+
+								member.set_bidDate(outputBidDate);
+							}
+
+							members_data.add(member);
+						}
+					}catch (Exception e) {
+						e.printStackTrace();
+					}
+
+					Members_Adapter membersAdapter = new Members_Adapter(MembersList.this, R.layout.custom_member_list,
+							members_data);
+					memberListView.setAdapter(membersAdapter);
+					membersAdapter.notifyDataSetChanged();
+
+					pd.dismiss();
+				}
+				else if(result.equalsIgnoreCase("NO_INTERNET")) {
+					pd.dismiss();
+					Toast.makeText(getApplicationContext(), "Please check network connection", Toast.LENGTH_SHORT).show();
+					//CommonMethods.showErrorDialog("Please check network connection", MembersList.this);				
+				}
+				else if(result.equalsIgnoreCase("SERVICE_ERROR")) {
+					pd.dismiss();
+					Toast.makeText(getApplicationContext(), "Service error,please contact administrator", Toast.LENGTH_SHORT).show();
+					//CommonMethods.showErrorDialog("Service error,please contact administrator", MembersList.this);				
+				}
+				else if(result.equalsIgnoreCase("This is Owner Month."))
+				{
+					pd.dismiss();
+					Toast.makeText(getApplicationContext(), result, Toast.LENGTH_SHORT).show();
+					//CommonMethods.showErrorDialog(result,MembersList.this);
+				}
+				else {
+					
+					errorMsg.setVisibility(View.VISIBLE);
+					errorMsg.setText(result);
+					
+					pd.dismiss();
+					//CommonMethods.showErrorDialog(result,MembersList.this);
+					//Toast.makeText(getApplicationContext(), result, Toast.LENGTH_LONG).show();				
+				}
+			}
+
+			super.onPostExecute(result);
+		}
+	}
+
+	public class Members_Adapter extends ArrayAdapter<MemberList> {
+		Activity activity;
+		int layoutResourceId;
+		MemberList member;
+		ArrayList<MemberList> data = new ArrayList<MemberList>();
+
+		public Members_Adapter(Activity act, int layoutResourceId,
+				ArrayList<MemberList> data) {
+			super(act, layoutResourceId, data);
+			this.layoutResourceId = layoutResourceId;
+			this.activity = act;
+			this.data = data;
+			for(int i=0; i<this.data.size();i++)
+			{
+				boolean_members_data.add(false);
+			}
+			//notifyDataSetChanged();
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			row = convertView;
+
+			String today = new SimpleDateFormat("dd/MM/yy").format(new Date());
+			String thisMonth = new SimpleDateFormat("yyyy-MM").format(new Date());
+
+			if (row == null) {
+				LayoutInflater inflater = LayoutInflater.from(activity);
+				row = inflater.inflate(layoutResourceId, parent, false);
+
+				holder = new MemberHolder();
+				holder.holder_tv_memberName = (TextView) row.findViewById(R.id.tv_memberName);
+				holder.holder_tv_memberName.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf"));
+				holder.holder_tv_bidAmount = (TextView) row.findViewById(R.id.tv_bidAmount);
+				holder.holder_tv_bidAmount.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf"));
+				holder.holder_et_bidAmount = (EditText) row.findViewById(R.id.et_bidAmount);
+				holder.holder_et_bidAmount.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf"));
+				holder.holder_iv_editButton = (ImageView) row.findViewById(R.id.iv_editButton);
+				holder.holder_iv_bidButton = (ImageView) row.findViewById(R.id.iv_bidButton);
+
+				row.setTag(holder);
+			} else {
+				holder = (MemberHolder) row.getTag();
+			}
+			member = data.get(position);
+			holder.holder_iv_editButton.setTag(position);
+			holder.holder_iv_bidButton.setTag(position);
+
+			/*
+			if(!today.equals(chitBidDate) && member.get_isOwner().equalsIgnoreCase("Yes"))
+			{
+				holder.holder_tv_memberName.setText(member.get_memberName()+" (Owner)");
+			}
+			else if(today.equals(chitBidDate) && member.get_isOwner().equalsIgnoreCase("Yes") && bidApproveStatus.equalsIgnoreCase("APPROVED"))
+			{
+				holder.holder_tv_memberName.setText(member.get_memberName()+" (Owner)");
+			}
+			*/
+			if(member.get_isOwner().equalsIgnoreCase("Yes"))
+				holder.holder_tv_memberName.setText(member.get_memberName()+" (Owner)");
+			else
+				holder.holder_tv_memberName.setText(member.get_memberName());
+
+			if(today.equals(chitBidDate) && !thisMonth.equals(chitOwnerMonth) && bidApproveStatus.equalsIgnoreCase("APPROVED"))
+			{
+				holder.holder_et_bidAmount.setVisibility(View.GONE);
+				holder.holder_iv_bidButton.setVisibility(View.GONE);
+				holder.holder_iv_editButton.setVisibility(View.GONE);
+				holder.holder_tv_bidAmount.setVisibility(View.GONE);
+			}
+			else if(today.equals(chitBidDate) && !thisMonth.equals(chitOwnerMonth))
+			{
+				holder.holder_tv_bidAmount.setText(getResources().getString(R.string.Rupee)+" "+member.get_bidAmount());
+				holder.holder_et_bidAmount.setText(member.get_bidAmount());
+
+				if(member.get_isOwner().equalsIgnoreCase("Yes") || member.get_isWonBid().equalsIgnoreCase("1"))
+				{
+					holder.holder_et_bidAmount.setVisibility(View.GONE);
+					holder.holder_iv_bidButton.setVisibility(View.GONE);
+					holder.holder_iv_editButton.setVisibility(View.GONE);
+				}
+				else
+				{
+					if(boolean_members_data.get(position))
+					{
+						holder.holder_et_bidAmount.setVisibility(View.VISIBLE);
+						holder.holder_iv_bidButton.setVisibility(View.VISIBLE);
+						holder.holder_iv_editButton.setVisibility(View.GONE);
+						holder.holder_tv_bidAmount.setVisibility(View.GONE);
+					}
+					else
+					{
+						holder.holder_et_bidAmount.setVisibility(View.GONE);
+						holder.holder_iv_bidButton.setVisibility(View.GONE);
+						holder.holder_iv_editButton.setVisibility(View.VISIBLE);
+						holder.holder_tv_bidAmount.setVisibility(View.VISIBLE);
+					}
+				}
+
+				holder.holder_iv_editButton.setOnClickListener(new View.OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+
+						for(int i=0; i<data.size();i++)
+						{
+							boolean_members_data.set(i,false);
+						}
+						int position = (Integer)v.getTag();
+						boolean_members_data.set(position, true);
+						notifyDataSetChanged();
+					}
+				});
+
+				holder.holder_iv_bidButton.setOnClickListener(new View.OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+
+						checkNet = Utils.isInternetAvailable(MembersList.this);
+
+						if(!checkNet)
+						{
+							Toast.makeText(getApplicationContext(), "Please check network connection", Toast.LENGTH_SHORT).show();
+							//CommonMethods.showErrorDialog("Please check network connection", MembersList.this);
+						}
+						else
+						{
+							hideSoftKeyboard(MembersList.this);
+
+							int position = (Integer)v.getTag();
+							
+							boolean_members_data.set(position, false);
+
+							MemberList tempMember = members_data.get(position); 
+							bidUserID = tempMember.get_memberID();
+							chitMemberID = tempMember.get_chitMemberID();
+
+							LinearLayout tempLayout = (LinearLayout) v.getParent();
+
+							EditText enterBidAmount=(EditText)tempLayout.findViewById(R.id.et_bidAmount);
+
+							String bid_amount = enterBidAmount.getText().toString();
+
+							if(bid_amount==null || bid_amount.equals(""))
+								enteredBidAmount = Long.parseLong("0");
+							else
+								enteredBidAmount = Long.parseLong(enterBidAmount.getText().toString());
+
+							if(bid_amount==null || bid_amount.equals(""))
+							{
+								//Toast.makeText(getApplicationContext(), "Amount should not empty", Toast.LENGTH_SHORT).show();
+								CommonMethods.showErrorDialog("Bid amount should not empty",MembersList.this);
+							}
+							else if(enteredBidAmount<=highBidAmount)
+							{
+								//Toast.makeText(getApplicationContext(), "Amount should greaterthan "+getResources().getString(R.string.Rupee)+" "+highBidAmount, Toast.LENGTH_SHORT).show();
+								CommonMethods.showErrorDialog("Bid amount should be greater than the highest bid.("+getResources().getString(R.string.Rupee)+" "+highBidAmount+")",MembersList.this);
+							}
+							else if(enteredBidAmount>=chitTotAmount)
+							{
+								//Toast.makeText(getApplicationContext(), "Amount should lessthan "+getResources().getString(R.string.Rupee)+" "+chitTotAmount, Toast.LENGTH_SHORT).show();
+								CommonMethods.showErrorDialog("Bid amount should be less than the chit amount.("+getResources().getString(R.string.Rupee)+" "+chitTotAmount+")",MembersList.this);
+							}
+							else
+							{
+								new UpdateBidAmount().execute();
+							}					
+						}
+					}
+				});				
+			}
+			else
+			{
+				highestBidLayout.setVisibility(View.GONE);
+				holder.holder_et_bidAmount.setVisibility(View.GONE);
+				holder.holder_iv_bidButton.setVisibility(View.GONE);
+				holder.holder_iv_editButton.setVisibility(View.GONE);
+				holder.holder_tv_bidAmount.setVisibility(View.GONE);
+			}
+
+
+
+
+			return row;
+
+		}
+
+		class MemberHolder {
+			TextView holder_tv_memberName;
+			TextView holder_tv_bidAmount;
+			EditText holder_et_bidAmount;
+			ImageView holder_iv_editButton;
+			ImageView holder_iv_bidButton;
+		}
+	}
+
+	class UpdateBidAmount extends AsyncTask<Void, Void, String>
+	{
+		private String Error = null;
+		ProgressDialog pd;
+		String res;
+		String sStatus=null, sMessage=null;
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pd = new ProgressDialog(MembersList.this);
+			pd.setMessage("Updating Bid Amount,Please wait...");
+			pd.setCancelable(false);
+			pd.show();
+		}
+
+		@Override
+		protected String doInBackground(Void... params) {
+			try {
+
+				checkNet = Utils.isInternetAvailable(MembersList.this);
+
+				if(checkNet){
+
+					String url;
+
+					String todayBidDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+
+					url= getResources().getString(R.string.URL)+"?call=addBid&chitID="+chitID+"&memberID="+bidUserID+"&chitMemberID="
+							+chitMemberID+"&amount="+enteredBidAmount+"&bidDate="+todayBidDate;
+
+					try {
+						HttpClient client = new DefaultHttpClient();
+						HttpPost postAccept = new HttpPost(url);
+						HttpResponse response = client.execute(postAccept);
+						res = EntityUtils.toString(response.getEntity());
+					} catch (Exception e) {
+						Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+						//CommonMethods.showErrorDialog(e.getMessage(), MembersList.this);
+					}
+
+					jsonResponse = new JSONObject(res);
+
+					sStatus = jsonResponse.getString("Status");
+					sMessage = jsonResponse.getString("Message");
+
+					if(sStatus.equalsIgnoreCase("Success")) {
+						return "success";
+					}
+
+					if(!sMessage.equalsIgnoreCase("OK")) {
+						return sMessage;
+					}
+
+				}
+				else
+				{
+					return "NO_INTERNET";
+				}
+
+			}catch (Exception e) {
+				Error=e.getMessage();
+			}
+			return "SERVICE_ERROR";
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+
+			if(pd.isShowing())
+			{
+				if(!checkNet)
+				{
+					pd.dismiss();
+					Toast.makeText(getApplicationContext(), "Please check network connection", Toast.LENGTH_SHORT).show();
+					//CommonMethods.showErrorDialog("Please check network connection", MembersList.this);
+					finish();
+				}
+
+				if(result.equalsIgnoreCase("success")) {
+
+					//Toast.makeText(getApplicationContext(), "Welcome", Toast.LENGTH_LONG).show();
+
+					/*
+					Intent refreshIntent = new Intent(MembersList.this, MembersList.class);
+					refreshIntent.putExtra("chit", chitDetails);
+					startActivity(refreshIntent);
+					finish();
+					*/
+
+					pd.dismiss();
+					new GetAllMembers().execute();
+				}
+				else if(result.equalsIgnoreCase("NO_INTERNET")) {
+					pd.dismiss();
+					Toast.makeText(getApplicationContext(), "Please check network connection", Toast.LENGTH_SHORT).show();
+					//CommonMethods.showErrorDialog("Please check network connection", MembersList.this);				
+				}
+				else if(result.equalsIgnoreCase("SERVICE_ERROR")) {
+					pd.dismiss();
+					Toast.makeText(getApplicationContext(), "Service error,please contact administrator", Toast.LENGTH_SHORT).show();
+					//CommonMethods.showErrorDialog("Service error,please contact administrator", MembersList.this);				
+				}
+				else {
+					pd.dismiss();
+					Toast.makeText(getApplicationContext(), result, Toast.LENGTH_LONG).show();				
+				}
+			}
+
+			super.onPostExecute(result);
+		}
+	}	
+}

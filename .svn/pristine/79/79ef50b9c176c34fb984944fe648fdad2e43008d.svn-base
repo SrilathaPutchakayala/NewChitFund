@@ -1,0 +1,146 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F1ECEC"
+    tools:context="com.example.uixment.MainActivity$PlaceholderFragment" >
+
+    <RelativeLayout
+        android:id="@+id/addMember"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/headerbg" >
+
+        <ImageView
+            android:id="@+id/addMemberBackBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@drawable/back_button" />
+
+        <TextView
+            android:id="@+id/addMemberhead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="15dp"
+            android:text="@string/add_member"
+            android:textColor="#fff"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:id="@+id/addMemberAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="10dp"
+            android:background="@drawable/add_transparent_button" />
+        
+        <ImageView 
+            android:id="@+id/addMemberDone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="10dp"
+            android:src="@drawable/donebutton"
+            android:visibility="invisible"            
+            />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/addMemberNew"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/addMember"
+        android:background="@drawable/add_fields_back_img"
+         >
+
+        <TextView
+            android:id="@+id/addMemberNameLabel"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:text="@string/full_name"
+            android:textColor="#C0C0C0"
+            android:textSize="14sp"
+            android:layout_margin="16dp" 
+            />
+
+        <EditText
+            android:id="@+id/addMemberName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="7dp"
+            android:layout_toRightOf="@+id/addMemberNameLabel"
+            android:background="@drawable/fieldimg"
+            android:inputType="textPersonName"
+            android:singleLine="true"
+            android:paddingStart="10dp" 
+            android:textColor="@color/edittextcolor"/>
+        
+         <TextView
+            android:id="@+id/addMemberPhoneLabel"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:text="@string/mobile"
+            android:textColor="#C0C0C0"
+            android:textSize="14sp"
+            android:layout_margin="16dp"
+            android:layout_below="@+id/addMemberNameLabel" 
+            />
+         
+         <EditText
+            android:id="@+id/addMembermobile"
+            android:layout_toRightOf ="@+id/addMemberPhoneLabel"
+            android:layout_below="@+id/addMemberName"
+            android:background="@drawable/fieldimg"
+            android:inputType="phone"
+            android:maxLength="10"
+            android:singleLine="true" 
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="7dp"
+            android:paddingStart="10dp" 
+            android:textColor="@color/edittextcolor"/>
+        
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/addMemberSearchLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/addMemberNew"
+        android:background="@drawable/searchbar_back_bg" >
+
+        <EditText
+            android:id="@+id/addMemberSearch"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="10dp"
+            android:background="@drawable/searchbar_bg"
+            android:drawableRight="@drawable/searchbar_icon"
+            android:paddingEnd="6dp"
+            android:paddingStart="6dp"
+            android:hint="@string/search_member_name"
+            android:textColor="@color/edittextcolor"
+        />
+    </RelativeLayout>
+    
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/addMemberSearchLayout" >
+
+        <ListView
+            android:id="@+id/memberList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:focusableInTouchMode="false" >
+        </ListView>
+    </RelativeLayout>
+
+</RelativeLayout>

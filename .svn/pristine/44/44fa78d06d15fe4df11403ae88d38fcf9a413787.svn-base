@@ -1,0 +1,310 @@
+/***************************************************************
+ * 
+ * Project Name : Chitfund
+ * Class Name   : ChitDetails
+ * DateTime     : 27-May-2014 04:15 PM 
+ * Developer    : Durga Prasad B
+ * Company      : Sagarsoft India Ltd.
+ * 
+ * Description  :
+ * ------------------------------------------------------------- 
+ * This class is used to display chit full details.
+ * Here user will have the options differentiated by his/her role.
+ * For admin he/she will get Bidding,Members and Report Buttons.
+ * For user he/she will get Bidding button and Payment History button. 
+ * 
+ * On clicking Bidding button it will open Bidding List.
+ * On clicking Members button it will open Members List.
+ * On clicking Reports button all chit details will send to admin by email. 
+ * On clicking Payment History button it open Payment List.
+ * -------------------------------------------------------------
+ * 
+ * *************************************************************/
+
+package com.newchitfund.androidclient;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.newchitfund.businessobjects.Chit;
+
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class ChitDetails extends Activity{
+	Chit chitDetails = new Chit();
+
+	// To store userType shraredPreferences
+	String userType,userID;
+
+	String chitID,chitOwnerID;
+
+	TextView chitName,ownerName,totalAmount,noOfMembers,noOfMonths,startDate,payDate,bidDate,ownerMonth;
+
+	ImageView biddingButton,membersButton,reportsButton,paymentsHistoryButton;
+
+	ImageView biddingListCloseButton,membersListCloseButton;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+
+		setContentView(R.layout.chit_details);
+
+		chitName = (TextView)findViewById(R.id.tv_chitName);
+		ownerName = (TextView)findViewById(R.id.tv_ownerName);
+		totalAmount = (TextView)findViewById(R.id.tv_totalAmount);
+		noOfMembers = (TextView)findViewById(R.id.tv_noOfMembers);
+		noOfMonths = (TextView)findViewById(R.id.tv_noOfMonths);
+		startDate = (TextView)findViewById(R.id.tv_startDate);
+		payDate = (TextView)findViewById(R.id.tv_payDate);
+		bidDate = (TextView)findViewById(R.id.tv_bidDate);
+		ownerMonth = (TextView)findViewById(R.id.tv_ownerMonth);
+
+		biddingButton = (ImageView)findViewById(R.id.iv_Bidding_button);
+		membersButton= (ImageView)findViewById(R.id.iv_Members_button);
+		reportsButton = (ImageView)findViewById(R.id.iv_Reports_button);
+		paymentsHistoryButton = (ImageView)findViewById(R.id.iv_Payment_History_button);
+
+		Bundle bundle = getIntent().getExtras();
+		if(bundle!=null)
+		{
+			chitDetails = (Chit) bundle.getSerializable("chit");
+		}
+
+		chitID = chitDetails.get_chitID();
+		chitOwnerID = chitDetails.get_ownerID();
+		chitName.setText(chitDetails.get_chitName());
+		ownerName.setText(chitDetails.get_ownerName());
+		totalAmount.setText(getResources().getString(R.string.Rupee)+" "+chitDetails.get_chitAmount());
+		noOfMembers.setText(chitDetails.get_noOfMembers());
+		noOfMonths.setText(chitDetails.get_noOfMonths());
+		startDate.setText(chitDetails.get_startDate());
+		payDate.setText(chitDetails.get_paymentDate());
+		bidDate.setText(chitDetails.get_bidDate());
+		ownerMonth.setText(chitDetails.get_ownerMonth());
+
+		//Storing sharedPreferences values into userType
+		SharedPreferences sharedpreferences = getSharedPreferences(SessionStorage.ACCOUNT_PREFS_NAME, Context.MODE_PRIVATE);
+		userType = sharedpreferences.getString("MEMBER_ROLE", null);
+		userID = sharedpreferences.getString("MEMBER_ID", null);
+
+		//userType = "ADMIN";
+
+		if(userType.equalsIgnoreCase("ADMIN"))
+			paymentsHistoryButton.setVisibility(View.GONE);
+		else if(userID.equals(chitOwnerID))
+			reportsButton.setVisibility(View.GONE);
+		else
+		{
+			membersButton.setVisibility(View.GONE);
+			reportsButton.setVisibility(View.GONE);
+		}
+
+		//Toast.makeText(getApplicationContext(), chitDetails.get_chitName(), Toast.LENGTH_SHORT).show();
+	}
+
+	/**
+	 * Method Name : goBack 
+	 * @param v    : View Object
+	 * Return Type : void
+	 * 
+	 * Description : This method is used to redirect the screen
+	 * to ViewChits Screen.
+	 */
+	public void goBack(View v)
+	{
+		Intent viewChitsIntent = new Intent(ChitDetails.this,ViewChits.class);
+		startActivity(viewChitsIntent);
+		finish();
+	}
+
+	/**
+	 * Method Name : goToEdit 
+	 * @param v    : View Object
+	 * Return Type : void
+	 * 
+	 * Description : This method is used to redirect the screen
+	 * to ChitDetails edit screen.
+	 */
+	public void goToEdit(View v)
+	{
+		Intent editChitIntent = new Intent(ChitDetails.this,ChitsCreation.class);
+		editChitIntent.putExtra("chitID", chitDetails.get_chitID());
+		editChitIntent.putExtra("chitDetails", chitDetails);
+		startActivity(editChitIntent);
+		finish();
+	}
+
+	/**
+	 * Method Name : getPaymentHistory 
+	 * @param v    : View Object
+	 * Return Type : void
+	 * 
+	 * Description : This method is used to redirect the screen
+	 * to PaymentHistory Screen.
+	 */
+	public void getPaymentHistory10(View v)
+	{
+		Intent paymentHistoryIntent = new Intent(ChitDetails.this,Payment.class);
+		paymentHistoryIntent.putExtra("chit", chitDetails);
+		startActivity(paymentHistoryIntent);
+	}
+
+	/**
+	 * Method Name : getBiddingDetails 
+	 * @param v    : View Object
+	 * Return Type : void
+	 * 
+	 * Description : This method is used to redirect the screen
+	 * to Bidding List Screen.
+	 */
+	public void getBiddingDetails(View v)
+	{
+		Intent biddingListIntent = new Intent(ChitDetails.this,BiddingDetails.class);
+		biddingListIntent.putExtra("chit", chitDetails);
+		startActivity(biddingListIntent);
+		//Toast.makeText(getApplicationContext(), "Bidding Button Clicked", Toast.LENGTH_SHORT).show();
+	}
+
+	/**
+	 * Method Name : getMembersDetails 
+	 * @param v    : View Object
+	 * Return Type : void
+	 * 
+	 * Description : This method is used to redirect the screen
+	 * to Members List Screen.
+	 */
+	public void getMembersDetails(View v)
+	{
+		Intent membersListIntent = new Intent(ChitDetails.this,MembersList.class);
+		membersListIntent.putExtra("chit", chitDetails);
+		startActivity(membersListIntent);
+	}
+
+
+	/**
+	 * Method Name : onBackPressed 
+	 * Return Type : void
+	 * 
+	 * Description : This method is used to handle device back button.
+	 * When user clicks on device back button it redirect the screen
+	 * to ViewChits Screen.
+	 */
+
+	@Override
+	public void onBackPressed() {
+		// TODO Auto-generated method stub
+		super.onBackPressed();
+
+		Intent viewChitsIntent = new Intent(ChitDetails.this,ViewChits.class);
+		startActivity(viewChitsIntent);
+		finish();
+	}
+
+	/**
+	 * Method Name : getReport 
+	 * @param v    : View Object
+	 * Return Type : void
+	 * 
+	 * Description : This method will send email with all the chit 
+	 * details to admin mail id.
+	 */
+	public void getReport(View v)
+	{
+		new SendReport().execute();
+	}
+
+
+	/***************************************************************
+	 * 
+	 * Project Name : Chitfund
+	 * Class Name   : SendReport
+	 * DateTime     : 27-May-2014 05:00 PM 
+	 * Developer    : Durga Prasad B
+	 * Company      : Sagarsoft India Ltd.
+	 * 
+	 * Description  :
+	 * ------------------------------------------------------------- 
+	 * This class is used to send chit report to admin using REST 
+	 * webservice by extending AsyncTask.
+	 * -------------------------------------------------------------
+	 * 
+	 * *************************************************************/
+
+	class SendReport extends AsyncTask<Void, Void, Void>
+	{
+		private String Error = null;
+		ProgressDialog pd,pd1;
+		String res;
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pd = new ProgressDialog(ChitDetails.this);
+			pd.setMessage("Sending report to your email, Please wait..");
+			pd.show();
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			try {
+				String url=getResources().getString(R.string.URL)+"?call=createReport&chitID="+chitID;
+
+				HttpClient client = new DefaultHttpClient();
+				HttpPost postAccept = new HttpPost(url);
+				HttpResponse response = client.execute(postAccept);
+				res = EntityUtils.toString(response.getEntity());
+				//Log.v("Response", res.toString());
+
+			}catch (Exception e) {
+				Error=e.getMessage();
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			if(pd.isShowing())
+			{
+				if(Error!=null)
+				{
+
+				}
+				else
+				{
+					try
+					{
+						JSONObject json = new JSONObject(res);
+						JSONArray jsonArray =json.getJSONArray("Result");
+
+					}catch (Exception e) {
+						e.printStackTrace();
+					}
+
+				}
+				pd.dismiss();
+
+				Toast.makeText(getApplicationContext(), "Report Sent Successfully", Toast.LENGTH_SHORT).show();
+
+			}
+		}
+	}	
+
+}

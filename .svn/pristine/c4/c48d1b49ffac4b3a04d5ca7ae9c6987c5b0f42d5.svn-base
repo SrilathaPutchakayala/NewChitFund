@@ -1,0 +1,143 @@
+/*************************************************************** 
+
+Project Name : NewChitFund
+
+ **************************************************************** 
+
+Class Name : ChitsCreation
+
+ Date : 27/05/2014
+
+ Developer : Veera manikanta reddy. G
+
+ Description : this class will handle chits creation 
+
+
+
+ **************************************************************** 
+
+Change History : 
+
+Date : 
+
+Developer : 
+
+Change : 
+
+ ****************************************************************/
+package com.newchitfund.androidclient;
+
+
+
+
+
+import java.util.Calendar;
+
+import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnFocusChangeListener;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class ChitsCreation extends Activity{
+
+	static final int DATE_DIALOG_ID = 0;
+	// variables to save user selected date and time
+	public int year, month, day, hour, minute;
+	private int mYear, mMonth, mDay;
+	
+	//default constructor
+	public ChitsCreation() {
+		// Assign current Date and Time Values to Variables
+		final Calendar c = Calendar.getInstance();
+		mYear = c.get(Calendar.YEAR);
+		mMonth = c.get(Calendar.MONTH);
+		mDay = c.get(Calendar.DAY_OF_MONTH);
+
+		}
+
+	// Register DatePickerDialog listener
+	private DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDateSetListener() {
+	// the callback received when the user "sets" the Date in the
+	// DatePickerDialog
+		public void onDateSet(DatePicker view, int yearSelected,int monthOfYear, int dayOfMonth) {
+		year = yearSelected;
+		month = monthOfYear;
+		day = dayOfMonth;
+		// Set the Selected Date in Select date Button
+		chitStartDate.setText(day + "-" + month + "-"+ year);
+		}
+	};
+
+	// Method automatically gets Called when you call showDialog() method
+	@Override
+	protected Dialog onCreateDialog(int id) {
+	switch (id) {
+		case DATE_DIALOG_ID:
+		// create a new DatePickerDialog with values you want to show
+		return new DatePickerDialog(this, mDateSetListener, mYear, mMonth,mDay);
+		}
+	return null;
+	}
+
+
+	Button btnBack, btnDone, btnAddMember;
+	EditText etChitName, etChitOwner, etChitAmount, etChitMembers, etChitMonths, etChitStart, etChitPay, etChitBid, etChitOwnerMonth;
+	Spinner paySpiner;
+	TextView chitStartDate;
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.chitcreation);
+		//etChitStart = (EditText)findViewById(R.id.chitStart);
+		chitStartDate = (TextView)findViewById(R.id.chitStart);
+		//etChitBid = (EditText)findViewById(R.id.chitBid);
+		//paySpiner = (Spinner)findViewById(R.id.chitPaySpinner);
+		
+		/* etChitStart.setOnFocusChangeListener(new OnFocusChangeListener() {
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+			    if(hasFocus){
+			    	showDialog(DATE_DIALOG_ID); 
+			    }else {
+			        Toast.makeText(getApplicationContext(), "lost the focus", Toast.LENGTH_LONG).show();
+			    }
+			   }
+			});
+		
+		paySpiner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> arg0, View arg1,int arg2, long arg3) {
+				// TODO Auto-generated method stub
+				Log.v("TAG","Clicked");
+				Toast.makeText(getApplicationContext(), "item clicked", Toast.LENGTH_LONG).show();
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			  
+			});*/
+		
+	}
+	public void showDateDialog(View v)
+	{
+		showDialog(DATE_DIALOG_ID); 
+	}
+
+}

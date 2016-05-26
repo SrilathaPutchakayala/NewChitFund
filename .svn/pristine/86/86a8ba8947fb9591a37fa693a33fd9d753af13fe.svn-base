@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+     >
+ 
+    <Button android:id="@+id/btn_categoriesLabel"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/top_header_bar"
+        android:text="@string/btn_categoriesLabel"
+        android:textSize="20sp"
+        android:textColor="#fff" />
+    
+    <RelativeLayout android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/btn_categoriesLabel"
+        android:gravity="center"
+        android:background="#fff" >
+	
+	    <Button android:id="@+id/btn_viewChits"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginBottom="30dp"
+	        android:background="@drawable/viewchits" />
+	
+	    <Button android:id="@+id/btn_chitsHistory"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@+id/btn_viewChits"
+	        android:layout_marginBottom="30dp"
+	        android:background="@drawable/chitshistory" />
+	
+	    <Button android:id="@+id/btn_settings"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@+id/btn_chitsHistory"
+	        android:background="@drawable/settings" />        
+    </RelativeLayout>
+
+
+</RelativeLayout>

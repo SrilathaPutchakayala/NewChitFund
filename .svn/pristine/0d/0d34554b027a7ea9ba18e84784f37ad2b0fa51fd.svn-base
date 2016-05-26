@@ -1,0 +1,217 @@
+/**
+ * Project Name	: Chitfund
+ * Class Name	: Categories
+ * Date			: 02-06-2014, 10:24 AM
+ * Developer	: Sanyasi Rao
+ * Company		: Sagarsoft India Ltd.
+ * 
+ * Description  :		
+ * ------------------------------------------------------------------------------------------------------------------------------------------
+ * This class shows up Categories screen to user.
+ * It shows categories based on user's role.
+ * It shows 'Categories - Admin' screen to user having role Admin.
+ * It shows 'Categories - User' screen to user having role Owner/User.
+ * When user clicks on a category from the list, it shows relevant screen to user.
+ * ------------------------------------------------------------------------------------------------------------------------------------------
+ */
+package com.newchitfund.androidclient;
+
+import java.util.HashMap;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+
+public class Categories extends Activity {
+	
+	private Button btnCreateChit;
+	private Button btnViewChits;
+	private Button btn_chitsHistory;
+	private Button btnAddMember;
+	private Button btnApproveDisapproveMember;
+	private Button btnChangePaymentStatus;
+	private Button btnSettings;
+	private String memberRole;
+	
+	protected void onCreate(Bundle savedInstanceState) {
+		
+		// To show screen based on role of user
+		HashMap<String, String> loggedInDetails = new HashMap<String, String>();
+		SessionStorage sessionStorage = new SessionStorage(getApplicationContext());
+		loggedInDetails = sessionStorage.getLoginDetails();
+		memberRole = loggedInDetails.get("MEMBER_ROLE");
+		
+		// Check user role to show relevant screen to user based on role.
+		if(memberRole.equalsIgnoreCase("ADMIN")) {
+			
+			// Show admin categories screen
+			setContentView(R.layout.admin_categories);
+			
+			// Get objects from template
+			btnCreateChit = (Button) findViewById(R.id.btn_createChit);
+			btnViewChits = (Button) findViewById(R.id.btn_viewChits);
+			btnAddMember = (Button) findViewById(R.id.btn_addMember);
+			btnApproveDisapproveMember = (Button) findViewById(R.id.btn_approveDisapproveMember);
+			btnChangePaymentStatus = (Button) findViewById(R.id.btn_changePaymentStatus);
+			btnSettings = (Button) findViewById(R.id.btn_settings);
+			
+			/**
+			 * This event triggers when user clicks on 'Create Chit' category. It shows the relevant screen to user.
+			 */
+			btnCreateChit.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					
+					// Navigate to 'Create New Chit' screen
+					Intent chitsCreation = new Intent(Categories.this, ChitsCreation.class);
+					startActivity(chitsCreation);
+					finish();
+				}
+			});
+			
+			/**
+			 * This event triggers when user clicks on 'View Chits' category. It shows the relevant screen to user.
+			 */
+			btnViewChits.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					
+					// Navigate to 'View Chits' Created screen
+					Intent viewChits = new Intent(Categories.this, ViewChits.class);
+					startActivity(viewChits);
+					finish();
+				}
+			});
+			
+			/**
+			 * This event triggers when user clicks on 'Add Member' category. It shows the relevant screen to user.
+			 */
+			btnAddMember.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					
+					// Navigate to 'Add Member' screen
+					Intent addMember = new Intent(Categories.this, AddMember.class);
+					startActivity(addMember);
+					finish();
+				}
+			});
+			
+			/**
+			 * This event triggers when user clicks on 'Approve/Disapprove Member' category. It shows the relevant screen to user.
+			 */
+			btnApproveDisapproveMember.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					
+					// Navigate to 'Approve/Disapprove Member' screen
+					Intent appMember = new Intent(Categories.this, UserApproveStatus.class);
+					startActivity(appMember);
+					finish();
+				}
+			});
+			
+			/**
+			 * This event triggers when user clicks on 'Change Payment Status' category. It shows the relevant screen to user.
+			 */
+			btnChangePaymentStatus.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					
+					// Navigate to 'Change Payment Status' screen
+					Intent paymentIntent = new Intent(Categories.this, ViewChits.class);
+					paymentIntent.putExtra("FROMSCREEN", "payment");
+					startActivity(paymentIntent);
+					finish();
+				}
+			});
+			
+			/**
+			 * This event triggers when user clicks on 'Settings' category. It shows the relevant screen to user.
+			 */
+			btnSettings.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					
+					// Navigate to 'Settings' screen
+					Intent settings = new Intent(Categories.this, Settings.class);
+					startActivity(settings);
+					finish();
+				}
+			});			
+		}else if(memberRole.equalsIgnoreCase("USER") || memberRole.equalsIgnoreCase("OWNER")) {
+			
+			setContentView(R.layout.user_categories);
+			
+			// Get objects from template
+			btnViewChits = (Button) findViewById(R.id.btn_viewChits);
+			btn_chitsHistory = (Button) findViewById(R.id.btn_chitsHistory); 
+			btnSettings = (Button) findViewById(R.id.btn_settings);
+			
+			/**
+			 * This event triggers when user clicks on 'View Chits Created' category. It shows the relevant screen to user.
+			 */
+			btnViewChits.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					
+					// Navigate to 'View Chits Created' screen
+					Intent viewChits = new Intent(Categories.this, ViewChits.class);
+					startActivity(viewChits);
+					finish();
+				}
+			});
+			
+			/**
+			 * This event triggers when user clicks on 'Chits History' category. It shows the relevant screen to user.
+			 */
+			btn_chitsHistory.setOnClickListener(new OnClickListener() {
+			
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					
+					// Navigate to 'Chits History' screen
+					Intent chitsHistory = new Intent(Categories.this, ChitsHistory.class);
+					startActivity(chitsHistory);
+					finish();
+				}
+			});			
+
+			/**
+			 * This event triggers when user clicks on 'Settings' category. It shows the relevant screen to user.
+			 */
+			btnSettings.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// Navigate to 'Settings' screen
+					Intent settings = new Intent(Categories.this, Settings.class);
+					startActivity(settings);
+					finish();
+				}
+			});			
+		}
+		
+		super.onCreate(savedInstanceState);
+		
+	}
+
+}
